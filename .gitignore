@@ -1,0 +1,57 @@
+# Virtual environments
+.venv/
+
+# Python cache files
+*.egg-info/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# VS Code
+.vscode/
+
+# Datasets
+/data/raw/*
+!/data/raw/.gitkeep
+/data/interim/*
+!/data/interim/.gitkeep
+/data/processed/*
+!/data/processed/.gitkeep
+
+# Generated artifacts
+/artifacts/*
+
+# MLflow runs
+/mlruns/
+/mlartifacts/
+
+# Model files
+*.pkl
+*.joblib
+*.pickle
+*.model
+*.onnx
+*.pt
+*.pth
+*.h5
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
