@@ -1,0 +1,17 @@
+dataset_name: paysim
+kaggle_handle: ealaxi/paysim1
+target_column: isFraud
+chunk_size: 250000
+raw_data_directory: data/raw
+expected_columns:
+  - step
+  - type
+  - amount
+  - nameOrig
+  - oldbalanceOrg
+  - newbalanceOrig
+  - nameDest
+  - oldbalanceDest
+  - newbalanceDest
+  - isFraud
+  - isFlaggedFraud

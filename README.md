@@ -1,71 +1,93 @@
 # FraudShield MLOps
 
-FraudShield is a production-style, end-to-end fraud detection MLOps platform for building, validating, and operating machine learning models with free and open-source Python tooling.
+FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 1A: reproducible PaySim dataset ingestion and schema validation**.
 
-The project is organized around the lifecycle of a fraud detection system: data ingestion, feature engineering, model training, evaluation, reproducible packaging, and future monitoring workflows. It uses a `src` package layout, isolated Python 3.12 environment, and development tooling suitable for collaborative ML engineering.
+## Dataset
 
-## Goals
+This phase uses the public Kaggle PaySim dataset:
 
-- Build reliable fraud detection models from structured transaction data.
-- Keep data, configuration, code, notebooks, and generated artifacts separated.
-- Support reproducible local development without paid APIs, subscriptions, cloud services, or proprietary datasets.
-- Provide a foundation for later additions such as experiment tracking, model serving, orchestration, and monitoring.
+- Dataset name: PaySim
+- Kaggle handle: `ealaxi/paysim1`
+- Target column: `isFraud`
+
+PaySim is a synthetic mobile-money transaction dataset generated from simulator behavior. It is useful for repeatable fraud detection workflow development, but it is not real customer banking data.
 
 ## Project Layout
 
 ```text
 fraudshield-mlops/
-├── artifacts/              # Generated model and evaluation outputs
-├── configs/                # Configuration files for experiments and pipelines
+├── artifacts/              # Generated manifests and validation reports, not committed
+├── configs/                # Versioned configuration files
 ├── data/
-│   ├── raw/                # Original datasets, not committed to Git
-│   ├── interim/            # Intermediate transformed data, not committed to Git
-│   └── processed/          # Final modeling datasets, not committed to Git
-├── notebooks/              # Exploratory analysis and reports
-├── src/
-│   └── fraudshield/
-│       ├── data/           # Data loading and validation code
-│       ├── features/       # Feature engineering logic
-│       ├── models/         # Training, evaluation, and inference code
-│       ├── monitoring/     # Future drift and quality monitoring code
-│       └── __init__.py
+│   ├── raw/                # Original datasets, not committed
+│   ├── interim/            # Intermediate transformed data, not committed
+│   └── processed/          # Final modeling datasets, not committed
+├── notebooks/              # Local notebooks, not required for Phase 1A
+├── src/fraudshield/
+│   ├── data/               # Data download and validation code
+│   ├── features/           # Reserved for later feature engineering
+│   ├── models/             # Reserved for later model training
+│   └── monitoring/         # Reserved for later monitoring
 └── tests/                  # Automated tests
 ```
 
-## Local Development
+## Setup
 
-This project targets Python 3.12 only. Create and activate the virtual environment before installing dependencies:
+Use the existing Python 3.12 virtual environment for this project.
 
 ```powershell
-py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip setuptools wheel
 python -m pip install -e ".[dev]"
 ```
 
-Register the notebook kernel:
+Kaggle credentials must be configured locally before downloading from Kaggle. Do not commit or print Kaggle tokens. Raw datasets, generated reports, credentials, environment files, and secrets are excluded from Git.
+
+## Download
+
+Download the PaySim CSV into `data/raw`:
 
 ```powershell
-python -m ipykernel install --user --name fraudshield --display-name "Python (FraudShield)"
+python -m fraudshield.data.download
 ```
 
-## Data Policy
+Force a fresh download:
 
-Datasets are intentionally excluded from version control. Keep raw, interim, and processed data under `data/`, and commit only the `.gitkeep` placeholders required to preserve the directory structure.
+```powershell
+python -m fraudshield.data.download --force
+```
 
-No fraud dataset has been downloaded for this initial scaffold.
+The downloader reuses an existing schema-matching CSV unless `--force` is supplied. It prints the final CSV path, filename, file size, and whether the file was downloaded or reused.
 
-## Tooling
+## Validation
 
-- Package management: `pip` with editable installs
-- Core ML stack: pandas, NumPy, scikit-learn, XGBoost, imbalanced-learn
-- Data formats: PyArrow
-- Validation and settings: Pydantic, pydantic-settings, python-dotenv, PyYAML
-- Development: pytest, pytest-cov, Ruff, JupyterLab, IPython kernel
+Validate the complete CSV in chunks without loading the full dataset into memory:
+
+```powershell
+python -m fraudshield.data.validate
+```
+
+Validation checks:
+
+- Exact expected PaySim columns
+- Binary values in `isFraud` and `isFlaggedFraud`
+- Numeric values in amount and balance columns
+- Missing values
+- Negative transaction amounts
+- Valid transaction type values
+
+Generated reports:
+
+- `artifacts/data/dataset_manifest.json`
+- `artifacts/data/data_quality_report.json`
+
+The manifest includes dataset identity, filename, relative path, file size, SHA-256 checksum, UTC validation timestamp, row count, and column count. The quality report includes validation status, fraud counts, fraud percentage, flagged fraud count, missing-value counts, transaction amount range, transaction counts by type, and fraud counts by transaction type.
 
 ## Quality Checks
 
 ```powershell
-python -m pytest
-python -m ruff check src tests
+python -m pytest -v
+python -m ruff check .
 ```
+
+Phase 1A intentionally does not include exploratory analysis, feature engineering, model training, MLflow, FastAPI, Docker, Airflow, Spark, or monitoring.

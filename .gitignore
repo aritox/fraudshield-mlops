@@ -22,6 +22,9 @@ htmlcov/
 # VS Code
 .vscode/
 
+# Codex local configuration
+.codex/
+
 # Datasets
 /data/raw/*
 !/data/raw/.gitkeep
@@ -32,6 +35,7 @@ htmlcov/
 
 # Generated artifacts
 /artifacts/*
+!/artifacts/.gitkeep
 
 # MLflow runs
 /mlruns/
