@@ -1,0 +1,9 @@
+time_column: step
+target_column: isFraud
+train_fraction: 0.70
+validation_fraction: 0.15
+test_fraction: 0.15
+chunk_size: 250000
+output_directory: data/processed
+compression: snappy
+random_seed: 42

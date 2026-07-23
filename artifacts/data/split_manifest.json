@@ -1,0 +1,77 @@
+{
+  "source_dataset_relative_path": "data/raw/paysim_download/PS_20174392719_1491204439457_log.csv",
+  "source_sha256_checksum": "16910f90577b0d981bf8ff289714510bb89bc71bff7d3f220f024e287e4eea6b",
+  "split_timestamp_utc": "2026-07-23T18:04:49Z",
+  "splitting_method": "chronological_whole_step",
+  "requested_split_fractions": {
+    "train": 0.7,
+    "validation": 0.15,
+    "test": 0.15
+  },
+  "actual_split_fractions": {
+    "train": 0.7015328591052113,
+    "validation": 0.14825480698202942,
+    "test": 0.1502123339127592
+  },
+  "split_config": {
+    "time_column": "step",
+    "target_column": "isFraud",
+    "train_fraction": 0.7,
+    "validation_fraction": 0.15,
+    "test_fraction": 0.15,
+    "chunk_size": 250000,
+    "output_directory": "data/processed",
+    "compression": "snappy",
+    "random_seed": 42
+  },
+  "random_seed": 42,
+  "time_column": "step",
+  "target_column": "isFraud",
+  "selected_step_boundaries": {
+    "train_validation": 323,
+    "validation_test": 377
+  },
+  "splits": {
+    "train": {
+      "step_minimum": 1,
+      "step_maximum": 323,
+      "row_count": 4463587,
+      "fraud_count": 3643,
+      "non_fraud_count": 4459944,
+      "fraud_percentage": 0.08161597387930379,
+      "actual_fraction": 0.7015328591052113,
+      "output_file": "data/processed/train.parquet",
+      "output_file_size_bytes": 204377967
+    },
+    "validation": {
+      "step_minimum": 324,
+      "step_maximum": 377,
+      "row_count": 943289,
+      "fraud_count": 560,
+      "non_fraud_count": 942729,
+      "fraud_percentage": 0.059366747624535,
+      "actual_fraction": 0.14825480698202942,
+      "output_file": "data/processed/validation.parquet",
+      "output_file_size_bytes": 44029730
+    },
+    "test": {
+      "step_minimum": 378,
+      "step_maximum": 743,
+      "row_count": 955744,
+      "fraud_count": 4010,
+      "non_fraud_count": 951734,
+      "fraud_percentage": 0.4195684199953125,
+      "actual_fraction": 0.1502123339127592,
+      "output_file": "data/processed/test.parquet",
+      "output_file_size_bytes": 44901587
+    }
+  },
+  "checks": {
+    "total_row_conservation": true,
+    "total_fraud_conservation": true,
+    "no_step_overlap": true,
+    "chronological_ordering_check": true,
+    "class_coverage_check": true
+  },
+  "overall_split_status": "passed"
+}

@@ -1,0 +1,32 @@
+# Target column for supervised learning.
+target:
+  - isFraud
+
+# Existing rule-based signal. Excluded from the baseline model so the ML
+# system is evaluated independently from the legacy rule.
+audit_only:
+  - isFlaggedFraud
+
+# High-cardinality identifiers. They must not be used directly as model inputs.
+# Future features based on customer identifiers must use only transactions that
+# occurred before the prediction time.
+raw_identifiers:
+  - nameOrig
+  - nameDest
+
+# Post-transaction balances. These describe balances after the transaction and
+# are excluded from a pre-transaction real-time model.
+post_transaction_features:
+  - newbalanceOrig
+  - newbalanceDest
+
+# Columns eligible for the first real-time baseline candidate set.
+real_time_baseline_candidates:
+  - step
+  - type
+  - amount
+  - oldbalanceOrg
+  - oldbalanceDest
+
+# Complete source columns may remain in split files for audit and analysis.
+# The future modeling pipeline must enforce this feature policy.

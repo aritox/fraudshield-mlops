@@ -32,10 +32,20 @@ htmlcov/
 !/data/interim/.gitkeep
 /data/processed/*
 !/data/processed/.gitkeep
+/data/processed/*.parquet
 
 # Generated artifacts
 /artifacts/*
 !/artifacts/.gitkeep
+!/artifacts/data/
+/artifacts/data/*
+!/artifacts/data/split_manifest.json
+!/artifacts/eda/
+/artifacts/eda/*
+!/artifacts/eda/train_eda_summary.json
+!/artifacts/eda/plots/
+/artifacts/eda/plots/*
+!/artifacts/eda/plots/*.png
 
 # MLflow runs
 /mlruns/
