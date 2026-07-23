@@ -46,12 +46,20 @@ htmlcov/
 !/artifacts/eda/plots/
 /artifacts/eda/plots/*
 !/artifacts/eda/plots/*.png
+!/artifacts/modeling/
+/artifacts/modeling/*
+!/artifacts/modeling/baseline_metrics.json
+!/artifacts/modeling/model_manifest.json
+!/artifacts/modeling/plots/
+/artifacts/modeling/plots/*
+!/artifacts/modeling/plots/*.png
 
 # MLflow runs
 /mlruns/
 /mlartifacts/
 
 # Model files
+/artifacts/models/*.joblib
 *.pkl
 *.joblib
 *.pickle

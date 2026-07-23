@@ -1,6 +1,6 @@
 # FraudShield MLOps
 
-FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 1A: reproducible PaySim dataset ingestion and schema validation**.
+FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 1C: leakage-safe baseline modeling**.
 
 ## Dataset
 
@@ -133,4 +133,34 @@ Generated Phase 1B files and reports:
 .\.venv\Scripts\python.exe -m ruff check .
 ```
 
-Phase 1A intentionally does not include exploratory analysis, feature engineering, model training, MLflow, FastAPI, Docker, Airflow, Spark, or monitoring.
+## Phase 1C -- Leakage-safe baseline modeling
+
+Phase 1C trains the first real-time, pre-transaction fraud baseline. The model uses only fields available before the transaction is completed: `step`, `type`, `amount`, `oldbalanceOrg`, and `oldbalanceDest`.
+
+Post-transaction balances are excluded because `newbalanceOrig` and `newbalanceDest` describe account state after the transaction and would leak future information into a real-time prediction. Raw account identifiers are excluded because `nameOrig` and `nameDest` are high-cardinality IDs; direct use would encourage memorization instead of general fraud behavior. `isFlaggedFraud` remains audit-only because it is an existing rule-based signal, and this baseline evaluates the ML model independently from that rule.
+
+Scaling is fitted with `StandardScaler.partial_fit` on training batches only, then reused unchanged for validation scoring. Class weights are calculated from training class counts only. SMOTE is not used because this baseline is incremental, validation must preserve the real chronological distribution, and synthetic oversampling would make the first benchmark harder to interpret.
+
+PR-AUC is the primary model-selection metric because fraud is rare and accuracy is dominated by non-fraud transactions. F2 is used for operational threshold selection because missing fraud is more costly than reviewing extra alerts in this baseline. Model selection chooses the candidate by validation PR-AUC; threshold selection then chooses the operating cutoff for the chosen model using validation F2.
+
+Validation results are development results, not final test performance. The final chronological test split remains sealed during Phase 1C: `data/processed/test.parquet` is not read, counted, scored, or used for thresholds.
+
+Train or reuse the Phase 1C baseline:
+
+```powershell
+.\.venv\Scripts\python.exe -m fraudshield.models.train_baseline
+```
+
+Replace only Phase 1C generated model artifacts, metrics, manifest, and plots:
+
+```powershell
+.\.venv\Scripts\python.exe -m fraudshield.models.train_baseline --force
+```
+
+Generated Phase 1C files:
+
+- `configs/modeling.yaml`
+- `artifacts/models/baseline_champion.joblib` ignored by Git
+- `artifacts/modeling/baseline_metrics.json`
+- `artifacts/modeling/model_manifest.json`
+- `artifacts/modeling/plots/*.png`

@@ -1,0 +1,88 @@
+{
+  "created_at_utc": "2026-07-23T18:50:23Z",
+  "git_commit_hash": "927fa98a351fb69f02fd3a6a28ae121b1a3c2763",
+  "python_version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "scikit_learn_version": "1.9.0",
+  "source_train_path": "data/processed/train.parquet",
+  "source_validation_path": "data/processed/validation.parquet",
+  "split_manifest_sha256": "f6ceb6748b640e5cdd969097ef0d9c9e79dc8f318e3cb4a125ae311249792029",
+  "modeling_config_sha256": "5421fa0e05813277993c787d8234e139e18875c0cb1d52cb0579442054637400",
+  "feature_policy_sha256": "ad0124b2b28dbae30ac7e8594870f8e30a1e0ace6c2183a9dfd314fb6df54c43",
+  "training_rows": 4463587,
+  "training_fraud_count": 3643,
+  "validation_rows": 943289,
+  "validation_fraud_count": 560,
+  "model_name": "unweighted_logistic",
+  "training_config": {
+    "batch_size": 250000,
+    "random_seed": 42,
+    "training_epochs": 3,
+    "train_path": "data/processed/train.parquet",
+    "validation_path": "data/processed/validation.parquet",
+    "selection_metric": "average_precision",
+    "threshold_metric": "f_beta",
+    "threshold_beta": 2.0,
+    "top_k_percentages": [
+      0.1,
+      0.5,
+      1.0
+    ],
+    "models": {
+      "unweighted_logistic": {
+        "loss": "log_loss",
+        "penalty": "l2",
+        "alpha": 0.0001,
+        "learning_rate": "optimal",
+        "average": true
+      },
+      "weighted_logistic": {
+        "loss": "log_loss",
+        "penalty": "l2",
+        "alpha": 0.0001,
+        "learning_rate": "optimal",
+        "average": true
+      }
+    }
+  },
+  "model_hyperparameters": {
+    "loss": "log_loss",
+    "penalty": "l2",
+    "alpha": 0.0001,
+    "learning_rate": "optimal",
+    "average": true
+  },
+  "class_weights": {
+    "0": 0.500408413199807,
+    "1": 612.6251715618995
+  },
+  "champion_class_weights": null,
+  "feature_names": [
+    "step",
+    "hour_of_day",
+    "hour_sin",
+    "hour_cos",
+    "log_amount",
+    "log_oldbalance_origin",
+    "log_oldbalance_destination",
+    "log_amount_to_origin_balance",
+    "log_amount_to_destination_balance",
+    "origin_balance_zero_before",
+    "destination_balance_zero_before",
+    "amount_exceeds_origin_balance",
+    "type_CASH_IN",
+    "type_CASH_OUT",
+    "type_DEBIT",
+    "type_PAYMENT",
+    "type_TRANSFER"
+  ],
+  "selected_threshold": 0.8260844945907593,
+  "model_artifact_relative_path": "artifacts/models/baseline_champion.joblib",
+  "model_artifact_file_size": 3596,
+  "model_artifact_sha256": "8fd15170c22b5d263f45fe505a1d3f29d74e0563ec9806a3bb80c9716dd814cc",
+  "test_set_accessed": false,
+  "reproducibility_status": "reproducible",
+  "metrics_summary": {
+    "champion_average_precision": 0.375911239819689,
+    "champion_roc_auc": 0.9839841632643104
+  }
+}
