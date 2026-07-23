@@ -1,6 +1,6 @@
 # FraudShield MLOps
 
-FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 1C: leakage-safe baseline modeling**.
+FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 1D: time-aware tuning and stronger model comparison**.
 
 ## Dataset
 
@@ -164,3 +164,44 @@ Generated Phase 1C files:
 - `artifacts/modeling/baseline_metrics.json`
 - `artifacts/modeling/model_manifest.json`
 - `artifacts/modeling/plots/*.png`
+
+## Phase 1D -- Time-aware tuning and stronger models
+
+Phase 1D tunes stronger candidates without using the official validation split for hyperparameter search. The search creates an internal chronological whole-step split inside `data/processed/train.parquet`: earlier training steps are used for fitting and later training steps are used for tuning. This keeps every complete simulated time step in one period and avoids random cross-validation that would mix future behavior into model selection.
+
+The official validation split is used only after the best SGD and XGBoost configurations are frozen in `artifacts/tuning/frozen_candidate_configs.json`. The final test split remains sealed: `data/processed/test.parquet` is not opened, counted, scored, plotted, or used for threshold selection. Phase 1D manifests record `test_set_accessed: false`.
+
+SGD logistic tuning tests moderate positive-class weights (`1` through `50`) because the fully balanced Phase 1C-style fraud weight of about `612` saturated probabilities and hurt model usefulness. XGBoost uses deterministic resource-aware sampling so local training does not need to materialize all non-fraud training rows at once: every fraud row is retained, non-fraud rows are sampled reproducibly, and sample weights make sampled non-fraud rows represent the original non-fraud population.
+
+The three evaluation stages are distinct:
+
+- Inner tuning: model and hyperparameter search inside the official training split only.
+- Official validation: final development comparison after configurations are frozen.
+- Final test evaluation: still sealed and not part of Phase 1D.
+
+PR-AUC remains the primary selection metric because fraud is rare and ranking quality matters more than accuracy. F2 is used for operating-threshold selection because recall is more important than precision at this stage. A Phase 1D candidate must beat the Phase 1C validation PR-AUC by at least the configured tolerance before replacing the baseline; otherwise the simpler Phase 1C baseline remains champion. Probability calibration is not performed yet.
+
+Run or reuse Phase 1D:
+
+```powershell
+.\.venv\Scripts\python.exe -m fraudshield.models.tune_models
+```
+
+Replace only Phase 1D generated tuning, model, and plot artifacts:
+
+```powershell
+.\.venv\Scripts\python.exe -m fraudshield.models.tune_models --force
+```
+
+Generated Phase 1D files:
+
+- `configs/tuning.yaml`
+- `artifacts/tuning/inner_split_manifest.json`
+- `artifacts/tuning/tuning_results.json`
+- `artifacts/tuning/tuning_manifest.json`
+- `artifacts/tuning/frozen_candidate_configs.json`
+- `artifacts/tuning/plots/*.png`
+- `artifacts/modeling/phase1d_validation_metrics.json`
+- `artifacts/modeling/phase1d_model_manifest.json`
+- `artifacts/modeling/phase1d_plots/*.png`
+- `artifacts/models/phase1d_champion.joblib` ignored by Git

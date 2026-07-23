@@ -50,9 +50,22 @@ htmlcov/
 /artifacts/modeling/*
 !/artifacts/modeling/baseline_metrics.json
 !/artifacts/modeling/model_manifest.json
+!/artifacts/modeling/phase1d_validation_metrics.json
+!/artifacts/modeling/phase1d_model_manifest.json
+# The Phase 1D metrics report contains embedded curve data and exceeds GitHub's blob limit.
+/artifacts/modeling/phase1d_validation_metrics.json
 !/artifacts/modeling/plots/
 /artifacts/modeling/plots/*
 !/artifacts/modeling/plots/*.png
+!/artifacts/modeling/phase1d_plots/
+/artifacts/modeling/phase1d_plots/*
+!/artifacts/modeling/phase1d_plots/*.png
+!/artifacts/tuning/
+/artifacts/tuning/*
+!/artifacts/tuning/*.json
+!/artifacts/tuning/plots/
+/artifacts/tuning/plots/*
+!/artifacts/tuning/plots/*.png
 
 # MLflow runs
 /mlruns/

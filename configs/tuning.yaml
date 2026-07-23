@@ -1,0 +1,86 @@
+random_seed: 42
+batch_size: 250000
+
+train_path: data/processed/train.parquet
+validation_path: data/processed/validation.parquet
+
+selection_metric: average_precision
+threshold_metric: f_beta
+threshold_beta: 2.0
+minimum_pr_auc_improvement: 0.001
+
+inner_tuning:
+  method: chronological_whole_step
+  fit_fraction: 0.80
+  tuning_fraction: 0.20
+
+sgd_search:
+  positive_class_weights:
+    - 1.0
+    - 2.0
+    - 5.0
+    - 10.0
+    - 25.0
+    - 50.0
+
+  alpha_values:
+    - 0.00001
+    - 0.0001
+    - 0.001
+
+  epoch_values:
+    - 2
+    - 3
+    - 5
+
+  maximum_trials: 12
+
+xgboost_search:
+  enabled: true
+  maximum_trials: 8
+  final_nonfraud_sample_limit: 1000000
+  inner_nonfraud_sample_limit: 500000
+  tree_method: hist
+  objective: binary:logistic
+  eval_metric: aucpr
+  n_jobs: 4
+  early_stopping_rounds: 30
+
+  parameter_space:
+    max_depth:
+      - 3
+      - 5
+      - 7
+    learning_rate:
+      - 0.03
+      - 0.05
+      - 0.1
+    n_estimators:
+      - 200
+      - 400
+      - 700
+    min_child_weight:
+      - 1
+      - 5
+      - 10
+    subsample:
+      - 0.7
+      - 0.85
+      - 1.0
+    colsample_bytree:
+      - 0.7
+      - 0.85
+      - 1.0
+    reg_lambda:
+      - 1.0
+      - 5.0
+      - 10.0
+    reg_alpha:
+      - 0.0
+      - 0.1
+      - 1.0
+
+top_k_percentages:
+  - 0.1
+  - 0.5
+  - 1.0

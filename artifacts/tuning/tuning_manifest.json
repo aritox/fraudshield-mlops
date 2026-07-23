@@ -1,0 +1,68 @@
+{
+  "created_at_utc": "2026-07-23T22:25:23Z",
+  "git_commit_hash": "fc74fc0d53a228fbb6e48ee0188867a809126893",
+  "python_version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "scikit_learn_version": "1.9.0",
+  "xgboost_version": "3.3.0",
+  "tuning_config_sha256": "00840c03091a0f8b6aec7967ccf8f936d263bd8a9370cb295618f1d599124386",
+  "source_split_manifest_sha256": "f6ceb6748b640e5cdd969097ef0d9c9e79dc8f318e3cb4a125ae311249792029",
+  "feature_policy_sha256": "ad0124b2b28dbae30ac7e8594870f8e30a1e0ace6c2183a9dfd314fb6df54c43",
+  "train_path": "data/processed/train.parquet",
+  "validation_path": "data/processed/validation.parquet",
+  "inner_split_information": {
+    "created_at_utc": "2026-07-23T22:12:32Z",
+    "source_train_path": "data/processed/train.parquet",
+    "source_split_manifest_sha256": "f6ceb6748b640e5cdd969097ef0d9c9e79dc8f318e3cb4a125ae311249792029",
+    "method": "chronological_whole_step",
+    "selected_step_boundary": 260,
+    "inner_fit_step_range": {
+      "minimum": 1,
+      "maximum": 260
+    },
+    "inner_tuning_step_range": {
+      "minimum": 261,
+      "maximum": 323
+    },
+    "inner_fit_row_count": 3570932,
+    "inner_tuning_row_count": 892655,
+    "inner_fit_fraud_count": 2925,
+    "inner_tuning_fraud_count": 718,
+    "inner_fit_fraud_percentage": 0.08191138895952094,
+    "inner_tuning_fraud_percentage": 0.08043421030521311,
+    "no_step_overlap": true,
+    "chronological_ordering_check": true,
+    "test_set_accessed": false,
+    "status": "passed"
+  },
+  "training_counts": {
+    "rows": 4463587,
+    "frauds": 3643,
+    "non_frauds": 4459944
+  },
+  "sampling_counts": {
+    "original_fitting_rows": 4463587,
+    "original_fraud_rows": 3643,
+    "original_nonfraud_rows": 4459944,
+    "sampled_fraud_rows": 3643,
+    "sampled_nonfraud_rows": 1000000,
+    "fraud_sampling_fraction": 1.0,
+    "nonfraud_sampling_fraction": 0.22421806193082244,
+    "sample_weights": {
+      "fraud": 1.0,
+      "nonfraud": 4.459944
+    },
+    "deterministic_seed": 42,
+    "raw_identifiers_used_as_model_features": false
+  },
+  "selected_threshold": 0.317007452249527,
+  "artifact_path": "artifacts/models/phase1d_champion.joblib",
+  "artifact_size_bytes": 269061,
+  "artifact_sha256": "0037c231092a7b728a55c29ce23d604b922cb406db3f2a3fe1b099d65f137263",
+  "model_artifact_sha256": "0037c231092a7b728a55c29ce23d604b922cb406db3f2a3fe1b099d65f137263",
+  "test_set_accessed": false,
+  "reproducibility_status": "reproducible",
+  "phase": "1D_tuning",
+  "official_validation_accessed_during_search": false,
+  "sgd_trial_count": 12,
+  "xgboost_trial_count": 8
+}

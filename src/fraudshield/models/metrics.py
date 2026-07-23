@@ -162,6 +162,7 @@ def evaluate_scores(
     amount: np.ndarray,
     top_k_percentages: list[float],
     threshold_beta: float = 2.0,
+    include_curve: bool = True,
 ) -> dict[str, Any]:
     """Evaluate ranking, threshold, and top-k metrics from validation scores."""
 
@@ -180,8 +181,7 @@ def evaluate_scores(
         amount,
         beta=threshold_beta,
     )
-    precision, recall, thresholds = precision_recall_curve(y_true, y_score)
-    return {
+    result = {
         **_ranking_metrics(y_true, y_score),
         "threshold_0_5": _binary_metrics(y_true, y_score, amount, 0.5, threshold_beta),
         "best_f1_threshold": float(best_f1_threshold),
@@ -190,10 +190,46 @@ def evaluate_scores(
         "best_f2": best_f2_metrics,
         "selected_threshold": float(best_f2_threshold),
         "selected_threshold_metrics": best_f2_metrics,
-        "precision_recall_curve": {
+        "top_k": top_k_metrics(y_true, y_score, amount, top_k_percentages),
+        "score_summary": score_summary(y_score),
+    }
+    if include_curve:
+        precision, recall, thresholds = precision_recall_curve(y_true, y_score)
+        result["precision_recall_curve"] = {
             "precision": _as_float_list(precision),
             "recall": _as_float_list(recall),
             "thresholds": _as_float_list(thresholds),
+        }
+    return result
+
+
+def score_summary(y_score: np.ndarray) -> dict[str, Any]:
+    """Summarize probability range, useful quantiles, and exact saturation counts."""
+
+    y_score = np.asarray(y_score, dtype=np.float64)
+    if len(y_score) == 0:
+        quantiles = {str(value): 0.0 for value in (0, 0.001, 0.01, 0.05, 0.5, 0.95, 0.99, 0.999, 1)}
+        return {
+            "minimum": 0.0,
+            "maximum": 0.0,
+            "quantiles": quantiles,
+            "exact_zero_count": 0,
+            "exact_one_count": 0,
+        }
+
+    probabilities = np.clip(y_score, 0.0, 1.0)
+    quantile_points = np.array([0, 0.001, 0.01, 0.05, 0.5, 0.95, 0.99, 0.999, 1])
+    return {
+        "minimum": float(np.min(probabilities)),
+        "maximum": float(np.max(probabilities)),
+        "quantiles": {
+            str(float(point)): float(value)
+            for point, value in zip(
+                quantile_points,
+                np.quantile(probabilities, quantile_points),
+                strict=True,
+            )
         },
-        "top_k": top_k_metrics(y_true, y_score, amount, top_k_percentages),
+        "exact_zero_count": int(np.sum(probabilities == 0.0)),
+        "exact_one_count": int(np.sum(probabilities == 1.0)),
     }
