@@ -1,0 +1,130 @@
+{
+  "created_at_utc": "2026-07-24T00:00:57Z",
+  "git_commit_hash": "8be41dae060e5f1f7ecb53eab5e33dde34d1e4b6",
+  "python_version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "scikit_learn_version": "1.9.0",
+  "configuration_sha256": "27cf5b144de3a4f5967baffd0482e327fe7c28acf9dfeb2bb5edaac0b91536e9",
+  "production_config_sha256": "27cf5b144de3a4f5967baffd0482e327fe7c28acf9dfeb2bb5edaac0b91536e9",
+  "source_split_manifest_sha256": "f6ceb6748b640e5cdd969097ef0d9c9e79dc8f318e3cb4a125ae311249792029",
+  "feature_policy_sha256": "ad0124b2b28dbae30ac7e8594870f8e30a1e0ace6c2183a9dfd314fb6df54c43",
+  "training_path": "data/processed/train.parquet",
+  "validation_path": "data/processed/validation.parquet",
+  "training_rows": 4463587,
+  "training_fraud_count": 3643,
+  "validation_rows": 943289,
+  "validation_fraud_count": 560,
+  "feature_names": [
+    "step",
+    "hour_of_day",
+    "hour_sin",
+    "hour_cos",
+    "log_amount",
+    "log_oldbalance_origin",
+    "log_oldbalance_destination",
+    "log_amount_to_origin_balance",
+    "log_amount_to_destination_balance",
+    "origin_balance_zero_before",
+    "destination_balance_zero_before",
+    "amount_exceeds_origin_balance",
+    "type_CASH_IN",
+    "type_CASH_OUT",
+    "type_DEBIT",
+    "type_PAYMENT",
+    "type_TRANSFER"
+  ],
+  "hyperparameters": {
+    "loss": "log_loss",
+    "penalty": "l2",
+    "alpha": 1e-05,
+    "epochs": 3,
+    "positive_class_weight": 5.0,
+    "random_seed": 42,
+    "batch_size": 250000
+  },
+  "class_weights": {
+    "0": 1.0,
+    "1": 5.0
+  },
+  "threshold": 0.98310834,
+  "threshold_source": "phase1d_validation_f2",
+  "artifact_path": "artifacts/models/production_sgd.joblib",
+  "artifact_size_bytes": 4674,
+  "artifact_sha256": "2d3bd1ff56e0c2a159d2ba395366dbf6d06e934559a1049c0ae6026a9ff29542",
+  "validation_reproduction_status": "passed",
+  "validation_verification_metrics": {
+    "average_precision": 0.5406332160823262,
+    "roc_auc": 0.9959320872851961,
+    "threshold": {
+      "threshold": 0.98310834,
+      "precision": 0.394919168591224,
+      "recall": 0.6107142857142858,
+      "f1": 0.47966339410939696,
+      "f_beta": 0.5505473277527366,
+      "specificity": 0.9994441668814685,
+      "false_positive_rate": 0.0005558331185314125,
+      "confusion_matrix": {
+        "true_negative": 942205,
+        "false_positive": 524,
+        "false_negative": 218,
+        "true_positive": 342
+      },
+      "predicted_positive_count": 866,
+      "alert_rate": 0.0009180643471937021,
+      "fraud_amount_captured": 564298119.74,
+      "fraud_amount_recall": 0.7505388032744525
+    },
+    "best_f1_threshold": 0.9969985485076904,
+    "best_f2_threshold": 0.9831083416938782,
+    "top_k": [
+      {
+        "top_k_percentage": 0.1,
+        "reviewed_transactions": 944,
+        "frauds_captured": 347,
+        "recall": 0.6196428571428572,
+        "precision": 0.3675847457627119,
+        "fraud_amount_captured": 575689055.0899999,
+        "fraud_amount_recall": 0.7656891975194391
+      },
+      {
+        "top_k_percentage": 0.5,
+        "reviewed_transactions": 4717,
+        "frauds_captured": 456,
+        "recall": 0.8142857142857143,
+        "precision": 0.09667161331354675,
+        "fraud_amount_captured": 679902168.25,
+        "fraud_amount_recall": 0.9042967570708506
+      },
+      {
+        "top_k_percentage": 1.0,
+        "reviewed_transactions": 9433,
+        "frauds_captured": 483,
+        "recall": 0.8625,
+        "precision": 0.05120322272871833,
+        "fraud_amount_captured": 718487319.34,
+        "fraud_amount_recall": 0.9556165331080199
+      }
+    ],
+    "score_summary": {
+      "minimum": 3.4767802786078716e-12,
+      "maximum": 0.9999997615814209,
+      "quantiles": {
+        "0.0": 3.4767802786078716e-12,
+        "0.001": 7.740909460096645e-10,
+        "0.01": 1.640940944014347e-08,
+        "0.05": 6.496698290447966e-08,
+        "0.5": 0.00010621362162055448,
+        "0.95": 0.03823475539684295,
+        "0.99": 0.6113235282897949,
+        "0.999": 0.9807317223548881,
+        "1.0": 0.9999997615814209
+      },
+      "exact_zero_count": 0,
+      "exact_one_count": 0
+    },
+    "row_count": 943289,
+    "fraud_count": 560
+  },
+  "training_duration_seconds": 25.738358800008427,
+  "test_set_accessed": false,
+  "reproducibility_status": "reproducible"
+}

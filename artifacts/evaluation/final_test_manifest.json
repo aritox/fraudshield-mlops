@@ -1,0 +1,32 @@
+{
+  "evaluation_timestamp_utc": "2026-07-24T00:02:25Z",
+  "git_commit_hash": "8be41dae060e5f1f7ecb53eab5e33dde34d1e4b6",
+  "production_model_artifact_path": "artifacts/models/production_sgd.joblib",
+  "production_model_sha256": "2d3bd1ff56e0c2a159d2ba395366dbf6d06e934559a1049c0ae6026a9ff29542",
+  "production_configuration_sha256": "27cf5b144de3a4f5967baffd0482e327fe7c28acf9dfeb2bb5edaac0b91536e9",
+  "test_file_relative_path": "data/processed/test.parquet",
+  "test_file_size": 44901587,
+  "test_file_sha256": "1294260b7e15ee8a476c34bcc6a10b4a790524026faa72584dbff6b94076fe9b",
+  "test_set_accessed": true,
+  "test_rows": 955744,
+  "test_fraud_count": 4010,
+  "test_step_minimum": 378,
+  "test_step_maximum": 743,
+  "frozen_threshold": 0.98310834,
+  "threshold_changed_after_test": false,
+  "hyperparameters_changed_after_test": false,
+  "features_changed_after_test": false,
+  "model_changed_after_test": false,
+  "test_used_for_model_selection": false,
+  "plot_paths": [
+    "artifacts/evaluation/plots/01_final_test_precision_recall_curve.png",
+    "artifacts/evaluation/plots/02_final_test_roc_curve.png",
+    "artifacts/evaluation/plots/03_validation_vs_test_metrics.png",
+    "artifacts/evaluation/plots/04_final_test_confusion_matrix.png",
+    "artifacts/evaluation/plots/05_final_test_top_k_recall.png",
+    "artifacts/evaluation/plots/06_final_test_fraud_amount_recall.png",
+    "artifacts/evaluation/plots/07_validation_vs_test_alert_rate.png",
+    "artifacts/evaluation/plots/08_final_test_score_distribution.png"
+  ],
+  "final_evaluation_status": "completed"
+}

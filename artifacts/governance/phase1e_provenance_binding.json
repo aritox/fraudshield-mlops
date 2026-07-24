@@ -1,0 +1,18 @@
+{
+  "creation_timestamp_utc": "2026-07-24T14:15:18Z",
+  "phase1e_implementation_commit_hash": "a96bf63b7bd2a2d13b3852be1d201f3d8cc3fd6a",
+  "production_model_artifact_relative_path": "artifacts/models/production_sgd.joblib",
+  "production_model_artifact_sha256": "2d3bd1ff56e0c2a159d2ba395366dbf6d06e934559a1049c0ae6026a9ff29542",
+  "production_configuration_sha256": "27cf5b144de3a4f5967baffd0482e327fe7c28acf9dfeb2bb5edaac0b91536e9",
+  "final_test_metrics_sha256": "787821e72df104679c8f4329823ca60d3921afa7a17ba6c51e690fb0cfeb7a90",
+  "final_test_manifest_sha256": "66288620c196eb34ff265cf89bd6b882bfb0612e92cff020da667c5dc83a0160",
+  "final_test_marker_sha256": "8c766bba4b2a3b8b782e4b641dfddcc496bc39f8808e43b2e852e7d0ba2fe294",
+  "statement": "Phase 1E code was committed after the one-time final holdout evaluation.",
+  "test_rescored": false,
+  "model_retrained": false,
+  "threshold_changed": false,
+  "features_changed": false,
+  "hyperparameters_changed": false,
+  "metrics_changed": false,
+  "provenance_status": "documented"
+}
