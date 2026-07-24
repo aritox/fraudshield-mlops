@@ -1,0 +1,28 @@
+model_name: production_sgd_logistic
+model_family: SGDClassifier
+loss: log_loss
+penalty: l2
+alpha: 0.00001
+epochs: 3
+positive_class_weight: 5.0
+random_seed: 42
+batch_size: 250000
+
+train_path: data/processed/train.parquet
+validation_path: data/processed/validation.parquet
+test_path: data/processed/test.parquet
+
+operational_threshold: 0.98310834
+threshold_source: phase1d_validation_f2
+
+top_k_percentages:
+  - 0.1
+  - 0.5
+  - 1.0
+
+final_test_policy:
+  allow_threshold_selection: false
+  allow_hyperparameter_changes: false
+  allow_feature_changes: false
+  allow_model_selection: false
+  allow_retraining_after_test_results: false

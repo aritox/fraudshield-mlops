@@ -66,6 +66,15 @@ htmlcov/
 !/artifacts/tuning/plots/
 /artifacts/tuning/plots/*
 !/artifacts/tuning/plots/*.png
+!/artifacts/governance/
+!/artifacts/governance/*.json
+!/artifacts/evaluation/
+!/artifacts/evaluation/*.json
+!/artifacts/evaluation/plots/
+/artifacts/evaluation/plots/*
+!/artifacts/evaluation/plots/*.png
+!/artifacts/model_card/
+!/artifacts/model_card/*.md
 
 # MLflow runs
 /mlruns/
@@ -73,6 +82,7 @@ htmlcov/
 
 # Model files
 /artifacts/models/*.joblib
+/artifacts/models/production_sgd.joblib
 *.pkl
 *.joblib
 *.pickle

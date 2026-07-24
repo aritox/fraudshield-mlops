@@ -205,3 +205,57 @@ Generated Phase 1D files:
 - `artifacts/modeling/phase1d_model_manifest.json`
 - `artifacts/modeling/phase1d_plots/*.png`
 - `artifacts/models/phase1d_champion.joblib` ignored by Git
+
+## Phase 1E -- Production SGD and final holdout evaluation
+
+Phase 1E promotes the frozen Phase 1D SGD candidate for production use. SGD was
+selected instead of XGBoost using operational and governance criteria: it has
+credible validation performance, incremental `partial_fit` training, low
+inference latency, a small model, interpretable coefficients, simple deployment,
+and straightforward monitoring. XGBoost remains a benchmark because its near-
+perfect PaySim result depends substantially on deterministic synthetic balance
+rules.
+
+The production model is trained only on the official training split. The official
+validation split is used to verify reproducibility and preserve the frozen F2
+threshold. The final test split is evaluated only once after the model, features,
+hyperparameters, and threshold are frozen. Test results cannot change the model,
+threshold, features, or training configuration. Future production monitoring is a
+separate activity that tracks drift, alert volume, precision, recall, amount
+capture, and latency without treating the score as a guaranteed calibrated
+probability.
+
+The lifecycle boundaries are:
+
+- Training: fit the scaler and SGD model on chronological training data only.
+- Validation/model development: verify the frozen candidate and threshold on the
+  official validation split.
+- Final holdout evaluation: score the sealed test split once and record immutable
+  results.
+- Future production monitoring: observe live behavior and govern any later
+  retraining as a new time-aware modeling cycle.
+
+Run promotion:
+
+```powershell
+.\.venv\Scripts\python.exe -m fraudshield.models.promote_sgd
+```
+
+Use `--force` only to replace the Phase 1E production bundle and governance
+manifest when the frozen configuration or source checksums require it. The
+production configuration is `configs/production.yaml`; the bundle is ignored by
+Git at `artifacts/models/production_sgd.joblib`.
+
+Run the one-time final evaluation only after promotion succeeds:
+
+```powershell
+.\.venv\Scripts\python.exe -m fraudshield.models.evaluate_final_test
+```
+
+If a completed marker exists, the evaluator reuses the recorded results when all
+checksums match. Re-evaluation requires the explicit
+`--acknowledge-final-holdout-rerun` option. Generated Phase 1E artifacts include
+the production decision and manifest under `artifacts/governance/`, final metrics
+and plots under `artifacts/evaluation/`, and the model card under
+`artifacts/model_card/`. PaySim is synthetic, and SGD scores are ranking scores,
+not automatically calibrated real-world fraud probabilities.
