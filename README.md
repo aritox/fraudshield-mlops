@@ -1,6 +1,6 @@
 # FraudShield MLOps
 
-FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 1D: time-aware tuning and stronger model comparison**.
+FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 2C: PostgreSQL prediction audit logging and Docker Compose**.
 
 ## Dataset
 
@@ -334,8 +334,8 @@ simulator rules.
 Every response includes a request ID and processing-time header. Application logs
 contain safe route, status, latency, count, alias, and version metadata, but never
 transaction amounts, balances, request bodies, or artifact paths. The current
-service binds only to `127.0.0.1`; authentication, PostgreSQL prediction logging,
-monitoring, and hosted deployment belong to later phases.
+service binds only to `127.0.0.1`; authentication, monitoring, and hosted deployment
+belong to later phases.
 
 Export the API contract without loading the model or starting a server:
 
@@ -410,3 +410,121 @@ The batch response contains an ordered `predictions` list with `item_index`,
 `fraud_score`, `prediction`, `threshold`, and `risk_level`, plus request, model,
 count, and processing metadata. Tracked Phase 2B contracts are
 `artifacts/api/openapi.json` and `artifacts/api/api_manifest.json`.
+
+## Phase 2C -- PostgreSQL audit logging and Docker Compose
+
+Phase 2C makes every returned prediction durable. SQLAlchemy 2.x and Psycopg write
+prediction requests and their ordered prediction events to PostgreSQL in one
+transaction. Alembic owns schema creation; API startup never calls `create_all` or
+runs a migration. If PostgreSQL is unavailable or the migration is not current,
+readiness fails and prediction routes return HTTP 503 rather than returning an
+unaudited score.
+
+The audit schema has three tables:
+
+- `prediction_requests` records request identity, canonical payload hash, frozen
+  model metadata, threshold, timing, and completion state.
+- `prediction_events` stores only the five approved synthetic model inputs and each
+  persisted score, class, risk level, and prediction ID.
+- `prediction_outcomes` stores delayed labels linked one-to-one to prediction events.
+
+An `X-Request-ID` must be a UUID when supplied; otherwise the API generates one.
+The payload hash is SHA-256 over the endpoint and ordered canonical JSON containing
+exactly `step`, `type`, `amount`, `oldbalanceOrg`, and `oldbalanceDest`. An identical
+retry returns the original prediction IDs without invoking the model and includes
+`X-Idempotent-Replay: true`. Reusing an ID for a different payload returns HTTP 409.
+Database uniqueness and transaction handling protect concurrent duplicate IDs, and
+batch requests either persist completely or roll back completely.
+
+Delayed outcomes are submitted atomically with `POST /outcomes`. Repeating the same
+label is idempotent, while changing `actual_fraud` for an already labelled prediction
+returns HTTP 409. Outcomes are audit data only: this phase never retrains or modifies
+the model.
+
+### Local model package and database schema
+
+The container receives an immutable export of
+`models:/fraudshield-production-sgd@champion`, resolved to version 1 with threshold
+`0.98310834`. Package generation verifies registry governance metadata and checksums,
+copies the existing MLflow PyFunc artifact, and compares synthetic predictions from
+the exported package with alias-loaded predictions. It does not fit a model, rescore
+historical data, create a model version, or alter an alias.
+
+```powershell
+.\.venv\Scripts\python.exe -m fraudshield.container.package_model
+.\.venv\Scripts\python.exe -m fraudshield.container.verify_package
+.\.venv\Scripts\python.exe -m fraudshield.persistence.export_schema
+.\.venv\Scripts\python.exe -m fraudshield.persistence.verify_database
+```
+
+MLflow does not need to run while the container serves. The pinned package contains
+the approved model and its manifest, so serving does not depend on the local MLflow
+UI, SQLite registry, or artifact store.
+
+### Local Compose stack
+
+A Docker image is the immutable application and model filesystem; a container is a
+running instance of that image. `Dockerfile` uses Python 3.12, installs runtime
+dependencies, verifies the packaged model before readiness, and runs Uvicorn as
+non-root user `10001`. `compose.yaml` provides three services on a private project
+network: PostgreSQL, a one-shot Alembic migrator, and the API. Compose waits for
+PostgreSQL health, then a successful migration, before starting the API. The API
+connects to host `postgres` over internal service networking; it does not need a host
+database address.
+
+PostgreSQL data is stored in the `postgres_data` named volume and survives normal
+stack stops and container replacement. PostgreSQL and the API publish only to
+localhost. Initialize local secrets and operate the stack with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/init_local_env.ps1
+powershell -ExecutionPolicy Bypass -File scripts/start_stack.ps1
+powershell -ExecutionPolicy Bypass -File scripts/stack_status.ps1
+powershell -ExecutionPolicy Bypass -File scripts/stop_stack.ps1
+```
+
+`.env` is generated only when absent, is ignored by Git, and its cryptographically
+random PostgreSQL password is never printed. `.env.example` contains placeholders
+only. A normal stop preserves records; `scripts/reset_local_database.ps1` refuses to
+remove the Phase 2C volume unless `-ConfirmReset` is explicitly supplied.
+
+Local addresses with default ports are:
+
+- API: `http://127.0.0.1:8000`
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- PostgreSQL: `127.0.0.1:5432`
+
+### API examples
+
+Single prediction with an idempotency key:
+
+```powershell
+$headers = @{ "X-Request-ID" = "d9d69bbc-5f72-4e40-abd0-859722e3e252" }
+$body = '{"step":24,"type":"TRANSFER","amount":1500.0,"oldbalanceOrg":1500.0,"oldbalanceDest":0.0}'
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/predict -Headers $headers -ContentType application/json -Body $body
+```
+
+The response retains all Phase 2B fields and adds `prediction_id`. Send the exact
+same body and header again to receive the same values and prediction ID with the
+`X-Idempotent-Replay: true` response header.
+
+Submit a delayed outcome, using the returned prediction ID:
+
+```powershell
+$outcome = '{"outcomes":[{"prediction_id":"11111111-1111-4111-8111-111111111111","actual_fraud":1,"source":"synthetic-local-review"}]}'
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/outcomes -ContentType application/json -Body $outcome
+```
+
+Retrieve its audit record:
+
+```powershell
+Invoke-RestMethod -Uri http://127.0.0.1:8000/predictions/11111111-1111-4111-8111-111111111111
+```
+
+This storage policy is suitable only for the synthetic local PaySim demonstration.
+Storing model inputs for real people or accounts requires data minimization, legal
+basis, access control, encryption in transit and at rest, retention/deletion rules,
+regional controls, and auditable authorization. This stack deliberately has no
+authentication or TLS and must not be exposed beyond localhost. Authentication,
+authorization, TLS, monitoring, queues, and production retention automation remain
+future phases.

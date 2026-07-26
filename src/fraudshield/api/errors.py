@@ -40,6 +40,36 @@ class InferenceError(ApiError):
         super().__init__("inference_error", "Prediction could not be completed", 500)
 
 
+class DatabaseNotReadyError(ApiError):
+    def __init__(self) -> None:
+        super().__init__("database_not_ready", "Prediction database is unavailable", 503)
+
+
+class MigrationNotCurrentError(ApiError):
+    def __init__(self) -> None:
+        super().__init__("migration_not_current", "Database migration is not current", 503)
+
+
+class PersistenceUnavailableApiError(ApiError):
+    def __init__(self) -> None:
+        super().__init__("persistence_unavailable", "Prediction persistence is unavailable", 503)
+
+
+class IdempotencyConflictApiError(ApiError):
+    def __init__(self) -> None:
+        super().__init__("idempotency_conflict", "Request ID was used for another payload", 409)
+
+
+class PredictionNotFoundApiError(ApiError):
+    def __init__(self) -> None:
+        super().__init__("prediction_not_found", "Prediction was not found", 404)
+
+
+class OutcomeConflictApiError(ApiError):
+    def __init__(self) -> None:
+        super().__init__("outcome_conflict", "Prediction already has a conflicting outcome", 409)
+
+
 class ModelLoadError(RuntimeError):
     """Internal startup error; never return its detail to an API caller."""
 
@@ -75,8 +105,7 @@ def install_error_handlers(app: FastAPI) -> None:
         details = [
             {
                 "location": [
-                    str(item) if not isinstance(item, int) else item
-                    for item in error["loc"]
+                    str(item) if not isinstance(item, int) else item for item in error["loc"]
                 ],
                 "message": error["msg"],
                 "error_type": error["type"],

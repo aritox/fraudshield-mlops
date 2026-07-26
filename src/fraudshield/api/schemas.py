@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from enum import StrEnum
 from typing import Annotated, Any, Literal
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -47,6 +49,7 @@ class BatchPredictionRequest(StrictSchema):
 
 class SinglePredictionResponse(StrictSchema):
     request_id: str
+    prediction_id: UUID
     fraud_score: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
     prediction: Literal[0, 1]
     threshold: float
@@ -58,6 +61,7 @@ class SinglePredictionResponse(StrictSchema):
 
 
 class BatchPredictionItem(StrictSchema):
+    prediction_id: UUID
     item_index: Annotated[int, Field(ge=0)]
     fraud_score: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
     prediction: Literal[0, 1]
@@ -95,6 +99,85 @@ class ReadinessResponse(StrictSchema):
     model_name: str
     model_version: str
     model_alias: Literal["champion"]
+    database_type: Literal["PostgreSQL"]
+    migration_status: Literal["current"]
+
+
+class DatabaseHealthResponse(StrictSchema):
+    status: Literal["healthy"]
+    database_type: Literal["PostgreSQL"]
+    migration_status: Literal["current"]
+
+
+class OutcomeSubmission(StrictSchema):
+    prediction_id: UUID
+    actual_fraud: Literal[0, 1]
+    observed_at: datetime | None = None
+    source: Annotated[str, Field(min_length=1, max_length=128)]
+
+    @field_validator("actual_fraud", mode="before")
+    @classmethod
+    def actual_fraud_is_strict_integer(cls, value: Any) -> Any:
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError("actual_fraud must be the integer 0 or 1")
+        return value
+
+    @field_validator("observed_at")
+    @classmethod
+    def observed_at_is_aware(cls, value: datetime | None) -> datetime | None:
+        if value is not None and (value.tzinfo is None or value.utcoffset() is None):
+            raise ValueError("observed_at must include a timezone")
+        return value
+
+    @field_validator("source")
+    @classmethod
+    def source_is_nonblank(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("source must not be blank")
+        return normalized
+
+
+class OutcomeBatchRequest(StrictSchema):
+    outcomes: Annotated[list[OutcomeSubmission], Field(min_length=1)]
+
+
+class OutcomeResponse(StrictSchema):
+    prediction_id: UUID
+    actual_fraud: Literal[0, 1]
+    observed_at: datetime
+    source: str
+    created_at: datetime
+    updated_at: datetime
+    replayed: bool
+
+
+class OutcomeBatchResponse(StrictSchema):
+    outcomes: list[OutcomeResponse]
+    outcome_count: Annotated[int, Field(ge=1)]
+
+
+class PredictionAuditResponse(StrictSchema):
+    prediction_id: UUID
+    request_id: UUID
+    item_index: Annotated[int, Field(ge=0)]
+    endpoint: str
+    model_name: str
+    model_version: str
+    model_alias: str
+    threshold: float
+    step: Annotated[int, Field(ge=1)]
+    transaction_type: TransactionType
+    amount: Annotated[float, Field(ge=0, allow_inf_nan=False)]
+    oldbalance_origin: Annotated[float, Field(ge=0, allow_inf_nan=False)]
+    oldbalance_destination: Annotated[float, Field(ge=0, allow_inf_nan=False)]
+    fraud_score: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
+    prediction: Literal[0, 1]
+    risk_level: RiskLevel
+    request_created_at: datetime
+    request_completed_at: datetime | None
+    prediction_created_at: datetime
+    outcome: OutcomeResponse | None
 
 
 class ModelInfoResponse(StrictSchema):

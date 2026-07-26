@@ -7,6 +7,7 @@ import threading
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import mlflow
@@ -69,15 +70,37 @@ class ProductionModelService:
             try:
                 root = self.config.repository_root
                 install_prohibited_data_guard(root)
-                tracking_config = self.mlflow_config or load_mlflow_config(root=root)
-                self._validate_local_registry_paths(root, tracking_config)
                 client = self._client
-                if client is None:
-                    client, _, _ = configure_local_mlflow(tracking_config)
-                version = client.get_model_version_by_alias(
-                    self.config.model.registered_name,
-                    self.config.model.alias,
-                )
+                if self.config.model.uri == "models:/fraudshield-production-sgd@champion":
+                    tracking_config = self.mlflow_config or load_mlflow_config(root=root)
+                    self._validate_local_registry_paths(root, tracking_config)
+                    if client is None:
+                        client, _, _ = configure_local_mlflow(tracking_config)
+                    version = client.get_model_version_by_alias(
+                        self.config.model.registered_name,
+                        self.config.model.alias,
+                    )
+                else:
+                    from fraudshield.container.verify_package import verify_package_integrity
+
+                    package = Path(self.config.model.uri)
+                    manifest_path = self.config.model.package_manifest
+                    if manifest_path is None:
+                        raise ValueError("Packaged model manifest is not configured")
+                    manifest = verify_package_integrity(package, manifest_path)
+                    version = SimpleNamespace(
+                        name=manifest["registered_model_name"],
+                        version=manifest["resolved_version"],
+                        aliases=[manifest["alias"]],
+                        tags={
+                            "role": "production",
+                            "model_family": manifest["model_family"],
+                            "threshold_source": "phase1d_validation_f2",
+                            "operational_threshold": str(manifest["frozen_threshold"]),
+                            "test_used_for_selection": "false",
+                            "source_model_sha256": manifest["source_model_checksum"],
+                        },
+                    )
                 self._validate_model_version(version)
                 model = self._model_loader(self.config.model.uri)
                 self._validate_signature(model)
@@ -88,8 +111,8 @@ class ProductionModelService:
                 self._model = model
                 self._model_version = str(version.version)
                 self._model_tags = dict(version.tags)
-                self._loaded_timestamp = datetime.now(UTC).isoformat(timespec="seconds").replace(
-                    "+00:00", "Z"
+                self._loaded_timestamp = (
+                    datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
                 )
                 self._load_error = None
             except Exception as error:
@@ -146,9 +169,10 @@ class ProductionModelService:
         predictions = output["prediction"].to_numpy()
         if not np.isfinite(scores).all() or ((scores < 0) | (scores > 1)).any():
             raise ValueError("Champion returned invalid fraud scores")
-        if not np.isfinite(thresholds).all() or not np.equal(
-            thresholds, self.config.model.expected_threshold
-        ).all():
+        if (
+            not np.isfinite(thresholds).all()
+            or not np.equal(thresholds, self.config.model.expected_threshold).all()
+        ):
             raise ValueError("Champion returned a non-frozen threshold")
         if not set(predictions.tolist()).issubset({0, 1}):
             raise ValueError("Champion returned invalid binary predictions")

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -38,6 +39,7 @@ class ModelConfig:
     expected_family: str
     expected_threshold: float
     load_on_startup: bool
+    package_manifest: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -138,9 +140,13 @@ def load_api_config(
     if not 1 <= port <= 65535:
         raise ValueError("API server port must be between 1 and 65535")
 
-    model_uri = str(model["uri"])
-    if model_uri != PRODUCTION_MODEL_URI or "xgboost" in model_uri.lower():
+    configured_model_uri = str(model["uri"])
+    model_uri = os.environ.get("FRAUDSHIELD_MODEL_URI", configured_model_uri).strip()
+    if "xgboost" in model_uri.lower():
         raise ValueError("API model URI must reference only the production SGD champion")
+    packaged_model = model_uri != PRODUCTION_MODEL_URI
+    if packaged_model and not Path(model_uri).is_absolute():
+        raise ValueError("Packaged model URI must be an absolute local path")
     if model["registered_name"] != PRODUCTION_MODEL_NAME:
         raise ValueError("API registered model must be fraudshield-production-sgd")
     if model["alias"] != PRODUCTION_ALIAS:
@@ -187,6 +193,16 @@ def load_api_config(
             expected_family=str(model["expected_family"]),
             expected_threshold=expected_threshold,
             load_on_startup=_strict_bool(model["load_on_startup"], "load_on_startup"),
+            package_manifest=(
+                Path(
+                    os.environ.get(
+                        "FRAUDSHIELD_MODEL_PACKAGE_MANIFEST",
+                        str(repo_root / "artifacts/container/model_package_manifest.json"),
+                    )
+                ).resolve()
+                if packaged_model
+                else None
+            ),
         ),
         inference=InferenceConfig(
             maximum_batch_size=maximum_batch_size,
@@ -196,9 +212,7 @@ def load_api_config(
         logging=LoggingConfig(
             level=level,
             log_raw_inputs=False,
-            include_request_id=_strict_bool(
-                logging["include_request_id"], "include_request_id"
-            ),
+            include_request_id=_strict_bool(logging["include_request_id"], "include_request_id"),
             include_latency=_strict_bool(logging["include_latency"], "include_latency"),
         ),
         api=RouteConfig(**route_values),

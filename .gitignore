@@ -111,3 +111,28 @@ htmlcov/
 # Logs
 *.log
 logs/
+
+# Phase 2C local database and container runtime state
+/artifacts/container_model/
+/artifacts/database_dumps/
+/artifacts/container_logs/
+/artifacts/docker_build_wheels/
+/.compose/
+compose.override.yaml
+compose.local.yaml
+postgres-data/
+/logs/api/
+.pytest-phase2c-tmp/
+.pytest-phase2c-cache/
+
+# Tracked Phase 2C manifests
+!/artifacts/database/
+/artifacts/database/*
+!/artifacts/database/schema_manifest.json
+!/artifacts/database/database_manifest.json
+!/artifacts/container/
+/artifacts/container/*
+!/artifacts/container/model_package_manifest.json
+!/artifacts/container/container_manifest.json
+!/artifacts/container/compose_smoke_report.json
+!/artifacts/container/docker_build_wheels_manifest.json

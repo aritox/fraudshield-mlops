@@ -1,0 +1,376 @@
+{
+  "alembic_head_revision": "phase2c_001",
+  "parquet_data_accessed": false,
+  "raw_data_accessed": false,
+  "schema_generation_timestamp_utc": "2026-07-26T15:53:04Z",
+  "source_git_commit": "5dd71a2b1a2c67ffd9c2c0529721b421e0953ea7",
+  "tables": [
+    {
+      "check_constraints": [
+        {
+          "name": "ck_prediction_requests_batch_size_positive",
+          "sql": "batch_size > 0"
+        },
+        {
+          "name": "ck_prediction_requests_payload_hash_length",
+          "sql": "length(payload_hash) = 64"
+        },
+        {
+          "name": "ck_prediction_requests_processing_time_finite_nonnegative",
+          "sql": "processing_time_ms IS NULL OR (processing_time_ms >= 0 AND processing_time_ms < 1.7976931348623157e308)"
+        },
+        {
+          "name": "ck_prediction_requests_threshold_range",
+          "sql": "threshold >= 0 AND threshold <= 1"
+        }
+      ],
+      "columns": [
+        {
+          "name": "request_id",
+          "nullable": false,
+          "primary_key": true,
+          "type": "UUID"
+        },
+        {
+          "name": "endpoint",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(64)"
+        },
+        {
+          "name": "payload_hash",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(64)"
+        },
+        {
+          "name": "batch_size",
+          "nullable": false,
+          "primary_key": false,
+          "type": "INTEGER"
+        },
+        {
+          "name": "model_name",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "model_version",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(64)"
+        },
+        {
+          "name": "model_alias",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(64)"
+        },
+        {
+          "name": "threshold",
+          "nullable": false,
+          "primary_key": false,
+          "type": "FLOAT(53)"
+        },
+        {
+          "name": "processing_time_ms",
+          "nullable": true,
+          "primary_key": false,
+          "type": "FLOAT(53)"
+        },
+        {
+          "name": "created_at",
+          "nullable": false,
+          "primary_key": false,
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "name": "completed_at",
+          "nullable": true,
+          "primary_key": false,
+          "type": "TIMESTAMP WITH TIME ZONE"
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "columns": [
+            "created_at"
+          ],
+          "name": "ix_prediction_requests_created_at",
+          "unique": false
+        },
+        {
+          "columns": [
+            "model_name",
+            "model_version"
+          ],
+          "name": "ix_prediction_requests_model_name_version",
+          "unique": false
+        }
+      ],
+      "name": "prediction_requests",
+      "primary_keys": [
+        "request_id"
+      ],
+      "unique_constraints": []
+    },
+    {
+      "check_constraints": [
+        {
+          "name": "ck_prediction_events_amount_finite_nonnegative",
+          "sql": "amount >= 0 AND amount < 1.7976931348623157e308"
+        },
+        {
+          "name": "ck_prediction_events_fraud_score_range",
+          "sql": "fraud_score >= 0 AND fraud_score <= 1"
+        },
+        {
+          "name": "ck_prediction_events_item_index_nonnegative",
+          "sql": "item_index >= 0"
+        },
+        {
+          "name": "ck_prediction_events_oldbalance_destination_finite_nonnegative",
+          "sql": "oldbalance_destination >= 0 AND oldbalance_destination < 1.7976931348623157e308"
+        },
+        {
+          "name": "ck_prediction_events_oldbalance_origin_finite_nonnegative",
+          "sql": "oldbalance_origin >= 0 AND oldbalance_origin < 1.7976931348623157e308"
+        },
+        {
+          "name": "ck_prediction_events_prediction_valid",
+          "sql": "prediction IN (0, 1)"
+        },
+        {
+          "name": "ck_prediction_events_risk_level_valid",
+          "sql": "risk_level IN ('low', 'medium', 'high')"
+        },
+        {
+          "name": "ck_prediction_events_step_positive",
+          "sql": "step >= 1"
+        },
+        {
+          "name": "ck_prediction_events_transaction_type_valid",
+          "sql": "transaction_type IN ('CASH_IN','CASH_OUT','DEBIT','PAYMENT','TRANSFER')"
+        }
+      ],
+      "columns": [
+        {
+          "name": "prediction_id",
+          "nullable": false,
+          "primary_key": true,
+          "type": "UUID"
+        },
+        {
+          "name": "request_id",
+          "nullable": false,
+          "primary_key": false,
+          "type": "UUID"
+        },
+        {
+          "name": "item_index",
+          "nullable": false,
+          "primary_key": false,
+          "type": "INTEGER"
+        },
+        {
+          "name": "step",
+          "nullable": false,
+          "primary_key": false,
+          "type": "INTEGER"
+        },
+        {
+          "name": "transaction_type",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(16)"
+        },
+        {
+          "name": "amount",
+          "nullable": false,
+          "primary_key": false,
+          "type": "FLOAT(53)"
+        },
+        {
+          "name": "oldbalance_origin",
+          "nullable": false,
+          "primary_key": false,
+          "type": "FLOAT(53)"
+        },
+        {
+          "name": "oldbalance_destination",
+          "nullable": false,
+          "primary_key": false,
+          "type": "FLOAT(53)"
+        },
+        {
+          "name": "fraud_score",
+          "nullable": false,
+          "primary_key": false,
+          "type": "FLOAT(53)"
+        },
+        {
+          "name": "prediction",
+          "nullable": false,
+          "primary_key": false,
+          "type": "INTEGER"
+        },
+        {
+          "name": "risk_level",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(16)"
+        },
+        {
+          "name": "created_at",
+          "nullable": false,
+          "primary_key": false,
+          "type": "TIMESTAMP WITH TIME ZONE"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "request_id"
+          ],
+          "ondelete": "CASCADE",
+          "referred_columns": [
+            "request_id"
+          ],
+          "referred_table": "prediction_requests"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": [
+            "created_at"
+          ],
+          "name": "ix_prediction_events_created_at",
+          "unique": false
+        },
+        {
+          "columns": [
+            "prediction"
+          ],
+          "name": "ix_prediction_events_prediction",
+          "unique": false
+        },
+        {
+          "columns": [
+            "request_id"
+          ],
+          "name": "ix_prediction_events_request_id",
+          "unique": false
+        },
+        {
+          "columns": [
+            "risk_level"
+          ],
+          "name": "ix_prediction_events_risk_level",
+          "unique": false
+        },
+        {
+          "columns": [
+            "transaction_type"
+          ],
+          "name": "ix_prediction_events_transaction_type",
+          "unique": false
+        }
+      ],
+      "name": "prediction_events",
+      "primary_keys": [
+        "prediction_id"
+      ],
+      "unique_constraints": [
+        [
+          "request_id",
+          "item_index"
+        ]
+      ]
+    },
+    {
+      "check_constraints": [
+        {
+          "name": "ck_prediction_outcomes_actual_fraud_valid",
+          "sql": "actual_fraud IN (0, 1)"
+        },
+        {
+          "name": "ck_prediction_outcomes_source_nonempty",
+          "sql": "length(trim(source)) > 0"
+        }
+      ],
+      "columns": [
+        {
+          "name": "prediction_id",
+          "nullable": false,
+          "primary_key": true,
+          "type": "UUID"
+        },
+        {
+          "name": "actual_fraud",
+          "nullable": false,
+          "primary_key": false,
+          "type": "INTEGER"
+        },
+        {
+          "name": "observed_at",
+          "nullable": false,
+          "primary_key": false,
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "name": "source",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(128)"
+        },
+        {
+          "name": "created_at",
+          "nullable": false,
+          "primary_key": false,
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "name": "updated_at",
+          "nullable": false,
+          "primary_key": false,
+          "type": "TIMESTAMP WITH TIME ZONE"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "prediction_id"
+          ],
+          "ondelete": "CASCADE",
+          "referred_columns": [
+            "prediction_id"
+          ],
+          "referred_table": "prediction_events"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": [
+            "actual_fraud"
+          ],
+          "name": "ix_prediction_outcomes_actual_fraud",
+          "unique": false
+        },
+        {
+          "columns": [
+            "observed_at"
+          ],
+          "name": "ix_prediction_outcomes_observed_at",
+          "unique": false
+        }
+      ],
+      "name": "prediction_outcomes",
+      "primary_keys": [
+        "prediction_id"
+      ],
+      "unique_constraints": []
+    }
+  ]
+}

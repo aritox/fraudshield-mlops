@@ -1,0 +1,30 @@
+database:
+  driver: postgresql+psycopg
+  host: 127.0.0.1
+  port: 5432
+  name: fraudshield
+  connect_timeout_seconds: 5
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout_seconds: 30
+  pool_recycle_seconds: 1800
+  pool_pre_ping: true
+
+environment:
+  database_url_variable: FRAUDSHIELD_DATABASE_URL
+  postgres_user_variable: POSTGRES_USER
+  postgres_password_variable: POSTGRES_PASSWORD
+  postgres_database_variable: POSTGRES_DB
+  postgres_port_variable: FRAUDSHIELD_POSTGRES_PORT
+
+persistence:
+  required_for_predictions: true
+  store_model_inputs: true
+  maximum_outcome_batch_size: 1000
+  request_id_header: X-Request-ID
+  replay_header: X-Idempotent-Replay
+  payload_hash_algorithm: sha256
+
+retention:
+  local_demo_only: true
+  automatic_deletion_enabled: false

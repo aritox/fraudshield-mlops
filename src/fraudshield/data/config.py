@@ -1,8 +1,8 @@
-
 """Configuration and path helpers for dataset ingestion."""
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -24,7 +24,9 @@ class DataConfig:
 
 def repository_root() -> Path:
     """Return the repository root for the installed source tree."""
-
+    override = os.environ.get("FRAUDSHIELD_REPOSITORY_ROOT", "").strip()
+    if override:
+        return Path(override).resolve()
     return Path(__file__).resolve().parents[3]
 
 

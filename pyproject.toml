@@ -36,7 +36,10 @@ dependencies = [
   "PyYAML",
   "mlflow>=3,<4",
   "fastapi",
-  "uvicorn[standard]"
+  "uvicorn[standard]",
+  "sqlalchemy>=2,<3",
+  "psycopg[binary]>=3,<4",
+  "alembic>=1,<2"
 ]
 
 [project.optional-dependencies]

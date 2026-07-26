@@ -4,12 +4,19 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from uuid import UUID
 
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from fraudshield.api.config import load_api_config
 from fraudshield.api.errors import ModelLoadError
 from fraudshield.api.main import create_app
+from fraudshield.persistence.database import DatabaseHealth
+from fraudshield.persistence.models import Base
+from fraudshield.persistence.service import PredictionPersistenceService
 from test_api_config import _write_configs
 
 
@@ -94,7 +101,29 @@ def _client(tmp_path: Path, service, maximum_batch_size: int = 1000, **kwargs):
         _write_configs(tmp_path, maximum_batch_size=maximum_batch_size),
         root=tmp_path,
     )
-    app = create_app(config, service, **kwargs)
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(engine)
+    with engine.begin() as connection:
+        connection.execute(text("CREATE TABLE alembic_version (version_num VARCHAR(32))"))
+        connection.execute(text("INSERT INTO alembic_version VALUES ('phase2c_001')"))
+    persistence = PredictionPersistenceService(sessionmaker(bind=engine, expire_on_commit=False))
+
+    class HealthyDatabase:
+        @staticmethod
+        def status():
+            return DatabaseHealth(True, "PostgreSQL", "current")
+
+    app = create_app(
+        config,
+        service,
+        persistence_service=persistence,
+        database_health=HealthyDatabase(),
+        **kwargs,
+    )
     return TestClient(app, raise_server_exceptions=False)
 
 
@@ -124,7 +153,7 @@ def test_single_and_batch_prediction_headers_order_and_safe_logs(
         single = client.post(
             "/predict",
             json=_transaction(amount=123456.789),
-            headers={"X-Request-ID": "request-123"},
+            headers={"X-Request-ID": "00000000-0000-4000-8000-000000000123"},
         )
         batch = client.post(
             "/predict/batch",
@@ -132,7 +161,8 @@ def test_single_and_batch_prediction_headers_order_and_safe_logs(
         )
 
     assert single.status_code == 200
-    assert single.headers["X-Request-ID"] == "request-123"
+    assert single.headers["X-Request-ID"] == "00000000-0000-4000-8000-000000000123"
+    UUID(single.json()["prediction_id"])
     assert float(single.headers["X-Process-Time-Ms"]) >= 0
     assert single.json()["threshold"] == 0.98310834
     assert batch.status_code == 200

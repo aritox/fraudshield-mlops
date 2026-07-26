@@ -1,0 +1,175 @@
+{
+  "alias": "champion",
+  "exported_package_checksum": "c75513da35e2b1020dcf15a1f20255b74ddcaba4967b9f21dbe91479601642c5",
+  "files": [
+    {
+      "path": "MLmodel",
+      "sha256": "b4be914a71c0dd93361780b7291d30491779340f3003d3f2084ee1214fed4548"
+    },
+    {
+      "path": "artifacts/production_sgd.joblib",
+      "sha256": "2d3bd1ff56e0c2a159d2ba395366dbf6d06e934559a1049c0ae6026a9ff29542"
+    },
+    {
+      "path": "code/src/fraudshield/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "code/src/fraudshield/analysis/__init__.py",
+      "sha256": "21d49dc291e7ee393058e5d57745ffcb5f65da29f45639843c56cd75303bfbbd"
+    },
+    {
+      "path": "code/src/fraudshield/analysis/eda.py",
+      "sha256": "589a3bfc347301785de2880976129908bd7456e05547487f89f635106ac7769d"
+    },
+    {
+      "path": "code/src/fraudshield/data/__init__.py",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "code/src/fraudshield/data/config.py",
+      "sha256": "0b28f8024a11d567a3c6d580880bc1f77c8cdd696307c44e68400f57daa8a0df"
+    },
+    {
+      "path": "code/src/fraudshield/data/download.py",
+      "sha256": "7b9b14e5cb775de8c7e79534468e1dd7d4674e101158625e46d262e8e534508f"
+    },
+    {
+      "path": "code/src/fraudshield/data/split.py",
+      "sha256": "1c61e64e1cf430d12949b9f2ffca593539a2a1204d73bb7461622cd5cd4032a9"
+    },
+    {
+      "path": "code/src/fraudshield/data/validate.py",
+      "sha256": "b014c46682fe75f8d175e781d7ba870a83dd038384d976d8a9e551447e5cbf7e"
+    },
+    {
+      "path": "code/src/fraudshield/features/__init__.py",
+      "sha256": "53a75a4709b071266ae8c6dd5ff3f8f4e357cc1455bc2ca83f854b28e05b65da"
+    },
+    {
+      "path": "code/src/fraudshield/features/baseline.py",
+      "sha256": "b831133006c291e75306e45e1bbb80dd24d7aeb8a2ac6b5065d0c2a08e9457b3"
+    },
+    {
+      "path": "code/src/fraudshield/models/__init__.py",
+      "sha256": "1e928c66e90350667d3bccec1d051b0fb39e798204297acef9b447577de60675"
+    },
+    {
+      "path": "code/src/fraudshield/models/evaluate_final_test.py",
+      "sha256": "59b2c68919d00f5e2aecb1d35381a8d0ad1add4ae139891ff5336572c13a1a92"
+    },
+    {
+      "path": "code/src/fraudshield/models/metrics.py",
+      "sha256": "235c464af608ed17590e66096134a1c70b8194208ef638e0c94099138f5cc1ab"
+    },
+    {
+      "path": "code/src/fraudshield/models/promote_sgd.py",
+      "sha256": "5d0f55521a8a06c02451b55db403dc79b573e36e7bb74f23dfa1338b686bc679"
+    },
+    {
+      "path": "code/src/fraudshield/models/sanity_audit.py",
+      "sha256": "7706fc93a96003e66d685edcf1cf284683cb65af60a39a9a701462bc9b591098"
+    },
+    {
+      "path": "code/src/fraudshield/models/temporal_tuning.py",
+      "sha256": "0ef72baed617ffaae8edda0d58c921059519aee02a18450744c56a0582025a5c"
+    },
+    {
+      "path": "code/src/fraudshield/models/train_baseline.py",
+      "sha256": "01f931ef324fb34f3ed032dc241e6ab7ef6448ec63a6e545d9ac023d9f16ffb1"
+    },
+    {
+      "path": "code/src/fraudshield/models/tune_models.py",
+      "sha256": "4de32ef9f0396da71e45a963503f456607b591a83ca5e32c384f2bc065eda87c"
+    },
+    {
+      "path": "code/src/fraudshield/monitoring/__init__.py",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "code/src/fraudshield/tracking/__init__.py",
+      "sha256": "a374c268f5c2693cb5c14fdf443494c6e93b10ec2fd49cf644a0ec3180e2a5ee"
+    },
+    {
+      "path": "code/src/fraudshield/tracking/config.py",
+      "sha256": "653f45c5632b93c0d43eb16f7d03fcab0c1ec476affe7d521319949d87df5b27"
+    },
+    {
+      "path": "code/src/fraudshield/tracking/log_existing_runs.py",
+      "sha256": "abe59f5ca398f479201a057de408dcfe5271a2baf2691dac85d76ab8b70cacf3"
+    },
+    {
+      "path": "code/src/fraudshield/tracking/mlflow_setup.py",
+      "sha256": "12ebc54a56ca9def5f390bab423eab6e2a210306a167f5af414d3e0ab7b30853"
+    },
+    {
+      "path": "code/src/fraudshield/tracking/model_wrapper.py",
+      "sha256": "36288d42592f468f09d8253809e9c74ccb1ab3a8098f0e818ea9b6c03bccb6e5"
+    },
+    {
+      "path": "code/src/fraudshield/tracking/verify_registry.py",
+      "sha256": "954d465f3faadf68470899c23571fe28b4d6fed5a0d96fcf5fa9bbd69a59c55f"
+    },
+    {
+      "path": "code/src/fraudshield_mlops.egg-info/PKG-INFO",
+      "sha256": "4b32c58c3d1a1154bdf221b891bb29e4a8bbb1820f2395d042c9a81e9e451172"
+    },
+    {
+      "path": "code/src/fraudshield_mlops.egg-info/SOURCES.txt",
+      "sha256": "7cb8b3898285aa7563e9d378262d030bc783cb32a66c5e744ba04f85a1c68412"
+    },
+    {
+      "path": "code/src/fraudshield_mlops.egg-info/dependency_links.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "code/src/fraudshield_mlops.egg-info/requires.txt",
+      "sha256": "21c06ccd593e76ecc9f56a0641ab353ba79d5da6ad44379cd828b8c1526a2004"
+    },
+    {
+      "path": "code/src/fraudshield_mlops.egg-info/top_level.txt",
+      "sha256": "c90999280021ba7230624be7cac968864c47b1ff42b69d7a610c095842441130"
+    },
+    {
+      "path": "conda.yaml",
+      "sha256": "98ee8fb0242ad897c3e519e3b496a9dcf6aef2ae394aac6ad3675f2677891fc3"
+    },
+    {
+      "path": "input_example.json",
+      "sha256": "baffaf22320fa560a0a519c74479901c7aa74247ee3dec071507e588bedc2911"
+    },
+    {
+      "path": "python_env.yaml",
+      "sha256": "e3f4a66c698489ccb2eb94cb78ccba5af73d6dfdd5850f6b04d1982c7642aea4"
+    },
+    {
+      "path": "python_model.pkl",
+      "sha256": "9fcec64b7804bd8f9f865ffbe79c2e9014c745ee8f18d639afb76e1e018f51cd"
+    },
+    {
+      "path": "registered_model_meta",
+      "sha256": "9014bd31d9e4a99b1d3bab53ff0de0d088aea2035ddd0ad606e15624855f67e8"
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "c56c2a79e9fa365a780e667dd206e10573280c280085888ce50bab682254cd5c"
+    },
+    {
+      "path": "serving_input_example.json",
+      "sha256": "1aa9f7b42bea406b85013acf52862e76110782a149ecfb9fa88e34d981bf3d02"
+    }
+  ],
+  "frozen_threshold": 0.98310834,
+  "generation_timestamp_utc": "2026-07-26T15:53:18Z",
+  "metrics_recomputed": false,
+  "model_family": "SGDClassifier",
+  "models_retrained": false,
+  "package_status": "verified",
+  "parquet_data_accessed": false,
+  "raw_data_accessed": false,
+  "registered_model_name": "fraudshield-production-sgd",
+  "resolved_version": "1",
+  "source_git_commit": "5dd71a2b1a2c67ffd9c2c0529721b421e0953ea7",
+  "source_model_checksum": "2d3bd1ff56e0c2a159d2ba395366dbf6d06e934559a1049c0ae6026a9ff29542",
+  "source_uri": "models:/fraudshield-production-sgd@champion"
+}

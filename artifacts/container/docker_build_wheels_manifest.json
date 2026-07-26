@@ -1,0 +1,43 @@
+{
+  "build_backend": "setuptools.build_meta",
+  "build_system_requirements": [
+    "setuptools>=68",
+    "wheel"
+  ],
+  "files": [
+    {
+      "filename": "packaging-26.2-py3-none-any.whl",
+      "name": "packaging",
+      "relationship": "wheel runtime dependency",
+      "resolved_version": "26.2",
+      "sha256": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+      "source": "pip_cache",
+      "tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "filename": "setuptools-83.0.0-py3-none-any.whl",
+      "name": "setuptools",
+      "relationship": "build-system requirement",
+      "resolved_version": "83.0.0",
+      "sha256": "29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3",
+      "source": "official_pypi",
+      "tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "filename": "wheel-0.47.0-py3-none-any.whl",
+      "name": "wheel",
+      "relationship": "build-system requirement",
+      "resolved_version": "0.47.0",
+      "sha256": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+      "source": "official_pypi",
+      "tags": [
+        "py3-none-any"
+      ]
+    }
+  ],
+  "generation_timestamp_utc": "2026-07-26T17:44:33Z"
+}

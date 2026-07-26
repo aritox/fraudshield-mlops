@@ -1,0 +1,78 @@
+{
+  "api_liveness_readiness": {
+    "/docs": 200,
+    "/health/db": 200,
+    "/health/live": 200,
+    "/health/ready": 200,
+    "/model/info": 200
+  },
+  "batch_atomicity_result": {
+    "prediction_count": 3,
+    "status": "passed"
+  },
+  "conflicting_retry_result": {
+    "http_status": 409,
+    "status": "passed"
+  },
+  "container_image_identifier": "sha256:59918ff580e207a00e34cf465f6007fd6fb0819d9ca967fadd2a59cdfc550600",
+  "database_failure_result": {
+    "prediction_http_status": 503,
+    "readiness_http_status": 503,
+    "status": "passed"
+  },
+  "database_row_counts": {
+    "prediction_events": 21,
+    "prediction_outcomes": 4,
+    "prediction_requests": 11
+  },
+  "idempotent_replay_result": {
+    "header": "true",
+    "model_inference_invocations": 1,
+    "row_counts_unchanged": true,
+    "same_prediction_id": true,
+    "status": "passed"
+  },
+  "log_safety_result": "passed",
+  "migration_revision": "phase2c_001",
+  "no_real_dataset_used": true,
+  "outcome_persistence_result": {
+    "conflict_http_status": 409,
+    "identical_replay": true,
+    "status": "passed"
+  },
+  "prediction_ids": [
+    "2b7bac78-0535-4306-9b46-c1f3ad67243b",
+    "edb0fb8d-e946-4470-b237-f65813f27999",
+    "56deef3e-0268-48dc-87fa-b1ddd8e588a4",
+    "d3d12247-1ad6-42f5-bfce-f37a1606c7de"
+  ],
+  "service_health": {
+    "api": {
+      "exit_code": 0,
+      "health": "healthy",
+      "state": "running"
+    },
+    "migrate": {
+      "exit_code": 0,
+      "health": "not_applicable",
+      "state": "exited"
+    },
+    "postgres": {
+      "exit_code": 0,
+      "health": "healthy",
+      "state": "running"
+    }
+  },
+  "smoke_test_status": "passed",
+  "synthetic_request_ids": {
+    "batch": "e4721405-2b00-4a7e-8530-344bbce492b5",
+    "database_failure": "50f1c631-35ba-468c-a5ff-df0221a073f4",
+    "single": "2704aa82-bdb1-4a81-beb4-52089412fb4f"
+  },
+  "timestamp_utc": "2026-07-26T17:58:02Z",
+  "volume_persistence_result": {
+    "audit_record_preserved": true,
+    "row_counts_preserved": true,
+    "status": "passed"
+  }
+}

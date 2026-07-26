@@ -23,6 +23,11 @@
             "title": "Prediction",
             "type": "integer"
           },
+          "prediction_id": {
+            "format": "uuid",
+            "title": "Prediction Id",
+            "type": "string"
+          },
           "risk_level": {
             "$ref": "#/components/schemas/RiskLevel"
           },
@@ -32,6 +37,7 @@
           }
         },
         "required": [
+          "prediction_id",
           "item_index",
           "fraud_score",
           "prediction",
@@ -109,6 +115,33 @@
         "title": "BatchPredictionResponse",
         "type": "object"
       },
+      "DatabaseHealthResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "database_type": {
+            "const": "PostgreSQL",
+            "title": "Database Type",
+            "type": "string"
+          },
+          "migration_status": {
+            "const": "current",
+            "title": "Migration Status",
+            "type": "string"
+          },
+          "status": {
+            "const": "healthy",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "database_type",
+          "migration_status"
+        ],
+        "title": "DatabaseHealthResponse",
+        "type": "object"
+      },
       "ErrorDetail": {
         "additionalProperties": false,
         "properties": {
@@ -179,6 +212,19 @@
           "request_id"
         ],
         "title": "ErrorResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
         "type": "object"
       },
       "LivenessResponse": {
@@ -294,9 +340,291 @@
         "title": "ModelInfoResponse",
         "type": "object"
       },
+      "OutcomeBatchRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "outcomes": {
+            "items": {
+              "$ref": "#/components/schemas/OutcomeSubmission"
+            },
+            "minItems": 1,
+            "title": "Outcomes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "outcomes"
+        ],
+        "title": "OutcomeBatchRequest",
+        "type": "object"
+      },
+      "OutcomeBatchResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "outcome_count": {
+            "minimum": 1.0,
+            "title": "Outcome Count",
+            "type": "integer"
+          },
+          "outcomes": {
+            "items": {
+              "$ref": "#/components/schemas/OutcomeResponse"
+            },
+            "title": "Outcomes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "outcomes",
+          "outcome_count"
+        ],
+        "title": "OutcomeBatchResponse",
+        "type": "object"
+      },
+      "OutcomeResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "actual_fraud": {
+            "enum": [
+              0,
+              1
+            ],
+            "title": "Actual Fraud",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "prediction_id": {
+            "format": "uuid",
+            "title": "Prediction Id",
+            "type": "string"
+          },
+          "replayed": {
+            "title": "Replayed",
+            "type": "boolean"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "prediction_id",
+          "actual_fraud",
+          "observed_at",
+          "source",
+          "created_at",
+          "updated_at",
+          "replayed"
+        ],
+        "title": "OutcomeResponse",
+        "type": "object"
+      },
+      "OutcomeSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "actual_fraud": {
+            "enum": [
+              0,
+              1
+            ],
+            "title": "Actual Fraud",
+            "type": "integer"
+          },
+          "observed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed At"
+          },
+          "prediction_id": {
+            "format": "uuid",
+            "title": "Prediction Id",
+            "type": "string"
+          },
+          "source": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "prediction_id",
+          "actual_fraud",
+          "source"
+        ],
+        "title": "OutcomeSubmission",
+        "type": "object"
+      },
+      "PredictionAuditResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "minimum": 0.0,
+            "title": "Amount",
+            "type": "number"
+          },
+          "endpoint": {
+            "title": "Endpoint",
+            "type": "string"
+          },
+          "fraud_score": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Fraud Score",
+            "type": "number"
+          },
+          "item_index": {
+            "minimum": 0.0,
+            "title": "Item Index",
+            "type": "integer"
+          },
+          "model_alias": {
+            "title": "Model Alias",
+            "type": "string"
+          },
+          "model_name": {
+            "title": "Model Name",
+            "type": "string"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "oldbalance_destination": {
+            "minimum": 0.0,
+            "title": "Oldbalance Destination",
+            "type": "number"
+          },
+          "oldbalance_origin": {
+            "minimum": 0.0,
+            "title": "Oldbalance Origin",
+            "type": "number"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OutcomeResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prediction": {
+            "enum": [
+              0,
+              1
+            ],
+            "title": "Prediction",
+            "type": "integer"
+          },
+          "prediction_created_at": {
+            "format": "date-time",
+            "title": "Prediction Created At",
+            "type": "string"
+          },
+          "prediction_id": {
+            "format": "uuid",
+            "title": "Prediction Id",
+            "type": "string"
+          },
+          "request_completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Completed At"
+          },
+          "request_created_at": {
+            "format": "date-time",
+            "title": "Request Created At",
+            "type": "string"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "risk_level": {
+            "$ref": "#/components/schemas/RiskLevel"
+          },
+          "step": {
+            "minimum": 1.0,
+            "title": "Step",
+            "type": "integer"
+          },
+          "threshold": {
+            "title": "Threshold",
+            "type": "number"
+          },
+          "transaction_type": {
+            "$ref": "#/components/schemas/TransactionType"
+          }
+        },
+        "required": [
+          "prediction_id",
+          "request_id",
+          "item_index",
+          "endpoint",
+          "model_name",
+          "model_version",
+          "model_alias",
+          "threshold",
+          "step",
+          "transaction_type",
+          "amount",
+          "oldbalance_origin",
+          "oldbalance_destination",
+          "fraud_score",
+          "prediction",
+          "risk_level",
+          "request_created_at",
+          "request_completed_at",
+          "prediction_created_at",
+          "outcome"
+        ],
+        "title": "PredictionAuditResponse",
+        "type": "object"
+      },
       "ReadinessResponse": {
         "additionalProperties": false,
         "properties": {
+          "database_type": {
+            "const": "PostgreSQL",
+            "title": "Database Type",
+            "type": "string"
+          },
+          "migration_status": {
+            "const": "current",
+            "title": "Migration Status",
+            "type": "string"
+          },
           "model_alias": {
             "const": "champion",
             "title": "Model Alias",
@@ -320,7 +648,9 @@
           "status",
           "model_name",
           "model_version",
-          "model_alias"
+          "model_alias",
+          "database_type",
+          "migration_status"
         ],
         "title": "ReadinessResponse",
         "type": "object"
@@ -407,6 +737,11 @@
             "title": "Prediction",
             "type": "integer"
           },
+          "prediction_id": {
+            "format": "uuid",
+            "title": "Prediction Id",
+            "type": "string"
+          },
           "processing_time_ms": {
             "minimum": 0.0,
             "title": "Processing Time Ms",
@@ -426,6 +761,7 @@
         },
         "required": [
           "request_id",
+          "prediction_id",
           "fraud_score",
           "prediction",
           "threshold",
@@ -485,11 +821,51 @@
         ],
         "title": "TransactionType",
         "type": "string"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
       }
     }
   },
   "info": {
-    "description": "Real-time fraud scoring with the registered production SGD model",
+    "description": "Real-time fraud scoring with the registered production SGD model. Local demonstration only; authentication and authorization are required before non-local deployment.",
     "title": "FraudShield Inference API",
     "version": "0.1.0"
   },
@@ -511,6 +887,34 @@
           }
         },
         "summary": "Root"
+      }
+    },
+    "/health/db": {
+      "get": {
+        "operationId": "database_readiness_health_db_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseHealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Database Readiness"
       }
     },
     "/health/live": {
@@ -587,6 +991,74 @@
         "summary": "Model Info"
       }
     },
+    "/outcomes": {
+      "post": {
+        "operationId": "submit_outcomes_outcomes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutcomeBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutcomeBatchResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Submit Outcomes"
+      }
+    },
     "/predict": {
       "post": {
         "operationId": "predict_predict_post",
@@ -610,6 +1082,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
           },
           "422": {
             "content": {
@@ -659,6 +1141,16 @@
             },
             "description": "Successful Response"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
           "422": {
             "content": {
               "application/json": {
@@ -681,6 +1173,66 @@
           }
         },
         "summary": "Predict Batch"
+      }
+    },
+    "/predictions/{prediction_id}": {
+      "get": {
+        "operationId": "prediction_audit_predictions__prediction_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "prediction_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Prediction Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionAuditResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Prediction Audit"
       }
     }
   }
