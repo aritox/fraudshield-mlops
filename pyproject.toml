@@ -34,7 +34,9 @@ dependencies = [
   "pydantic-settings",
   "python-dotenv",
   "PyYAML",
-  "mlflow>=3,<4"
+  "mlflow>=3,<4",
+  "fastapi",
+  "uvicorn[standard]"
 ]
 
 [project.optional-dependencies]

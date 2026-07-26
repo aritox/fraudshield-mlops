@@ -310,3 +310,103 @@ The UI is available at `http://127.0.0.1:5000`. Tracked exports are
 `artifacts/mlflow/registry_snapshot.json` and
 `artifacts/mlflow/mlflow_manifest.json`; the SQLite database and model artifact store
 remain local runtime state.
+
+## Phase 2B -- FastAPI real-time inference service
+
+Phase 2B exposes the registered production SGD champion as a local REST API.
+FastAPI defines the HTTP routes and OpenAPI documentation, Pydantic strictly
+validates JSON requests and responses, and Uvicorn runs the ASGI application.
+The service resolves `models:/fraudshield-production-sgd@champion` from the local
+MLflow registry and loads its PyFunc model once during application startup.
+
+Liveness and readiness have separate meanings. Liveness reports whether the API
+process is running. Readiness reports whether the champion passed registry,
+signature, threshold, and warm-up validation. If loading fails, liveness remains
+healthy while readiness and prediction routes return a sanitized HTTP 503.
+
+`POST /predict` scores one transaction. `POST /predict/batch` validates up to 1,000
+transactions and scores the complete batch in one PyFunc call while preserving
+input order. Responses call the model output `fraud_score`: it is a ranking score,
+not a calibrated real-world fraud probability. The XGBoost challenger is never used
+by the production API because its PaySim performance depends heavily on synthetic
+simulator rules.
+
+Every response includes a request ID and processing-time header. Application logs
+contain safe route, status, latency, count, alias, and version metadata, but never
+transaction amounts, balances, request bodies, or artifact paths. The current
+service binds only to `127.0.0.1`; authentication, PostgreSQL prediction logging,
+monitoring, and hosted deployment belong to later phases.
+
+Export the API contract without loading the model or starting a server:
+
+```powershell
+.\.venv\Scripts\python.exe -m fraudshield.api.export_contract
+```
+
+Start the local API:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start_api.ps1
+```
+
+Local addresses:
+
+- API: `http://127.0.0.1:8000`
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- ReDoc: `http://127.0.0.1:8000/redoc`
+
+Synthetic single request:
+
+```json
+{
+  "step": 24,
+  "type": "TRANSFER",
+  "amount": 1500.0,
+  "oldbalanceOrg": 1500.0,
+  "oldbalanceDest": 0.0
+}
+```
+
+Example response shape:
+
+```json
+{
+  "request_id": "7cb4972e-319f-4c9c-9c9a-235e63497989",
+  "fraud_score": 0.9982,
+  "prediction": 1,
+  "threshold": 0.98310834,
+  "risk_level": "high",
+  "model_name": "fraudshield-production-sgd",
+  "model_version": "1",
+  "model_alias": "champion",
+  "processing_time_ms": 2.4
+}
+```
+
+Synthetic batch request:
+
+```json
+{
+  "transactions": [
+    {
+      "step": 1,
+      "type": "PAYMENT",
+      "amount": 25.0,
+      "oldbalanceOrg": 100.0,
+      "oldbalanceDest": 50.0
+    },
+    {
+      "step": 24,
+      "type": "TRANSFER",
+      "amount": 1500.0,
+      "oldbalanceOrg": 1500.0,
+      "oldbalanceDest": 0.0
+    }
+  ]
+}
+```
+
+The batch response contains an ordered `predictions` list with `item_index`,
+`fraud_score`, `prediction`, `threshold`, and `risk_level`, plus request, model,
+count, and processing metadata. Tracked Phase 2B contracts are
+`artifacts/api/openapi.json` and `artifacts/api/api_manifest.json`.

@@ -1,0 +1,32 @@
+application:
+  title: FraudShield Inference API
+  description: Real-time fraud scoring with the registered production SGD model
+  version: 0.1.0
+
+server:
+  host: 127.0.0.1
+  port: 8000
+
+model:
+  uri: models:/fraudshield-production-sgd@champion
+  registered_name: fraudshield-production-sgd
+  alias: champion
+  expected_family: SGDClassifier
+  expected_threshold: 0.98310834
+  load_on_startup: true
+
+inference:
+  maximum_batch_size: 1000
+  medium_risk_threshold: 0.50
+  high_risk_threshold: 0.98310834
+
+logging:
+  level: INFO
+  log_raw_inputs: false
+  include_request_id: true
+  include_latency: true
+
+api:
+  docs_url: /docs
+  redoc_url: /redoc
+  openapi_url: /openapi.json

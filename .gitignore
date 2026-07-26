@@ -82,6 +82,10 @@ htmlcov/
 /artifacts/mlflow/mlflow.db
 /artifacts/mlflow/mlflow.db-*
 /artifacts/mlflow/artifacts/
+!/artifacts/api/
+/artifacts/api/*
+!/artifacts/api/openapi.json
+!/artifacts/api/api_manifest.json
 
 # MLflow runs
 /mlruns/
