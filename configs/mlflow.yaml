@@ -1,0 +1,23 @@
+experiment_names:
+  development: FraudShield-Development
+  final_evaluation: FraudShield-Final-Evaluation
+
+registered_models:
+  production: fraudshield-production-sgd
+  benchmark: fraudshield-xgboost-benchmark
+
+registry_aliases:
+  production: champion
+  benchmark: challenger
+
+risk_levels:
+  medium_threshold: 0.50
+  high_threshold: 0.98310834
+
+server:
+  host: 127.0.0.1
+  port: 5000
+
+storage:
+  backend_database: artifacts/mlflow/mlflow.db
+  artifact_root: artifacts/mlflow/artifacts

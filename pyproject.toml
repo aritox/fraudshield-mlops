@@ -33,7 +33,8 @@ dependencies = [
   "pydantic",
   "pydantic-settings",
   "python-dotenv",
-  "PyYAML"
+  "PyYAML",
+  "mlflow>=3,<4"
 ]
 
 [project.optional-dependencies]

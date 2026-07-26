@@ -75,6 +75,13 @@ htmlcov/
 !/artifacts/evaluation/plots/*.png
 !/artifacts/model_card/
 !/artifacts/model_card/*.md
+!/artifacts/mlflow/
+/artifacts/mlflow/*
+!/artifacts/mlflow/registry_snapshot.json
+!/artifacts/mlflow/mlflow_manifest.json
+/artifacts/mlflow/mlflow.db
+/artifacts/mlflow/mlflow.db-*
+/artifacts/mlflow/artifacts/
 
 # MLflow runs
 /mlruns/

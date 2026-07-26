@@ -259,3 +259,54 @@ the production decision and manifest under `artifacts/governance/`, final metric
 and plots under `artifacts/evaluation/`, and the model card under
 `artifacts/model_card/`. PaySim is synthetic, and SGD scores are ranking scores,
 not automatically calibrated real-world fraud probabilities.
+
+## Phase 2A -- Local MLflow tracking and model registry
+
+Phase 2A imports the existing FraudShield reports and packages the already-fitted
+model bundles in MLflow. MLflow records experiments and runs containing parameters,
+metrics, tags, and source artifacts. Its registry adds named models, immutable model
+versions, and aliases that identify the currently governed version without using
+deprecated model stages.
+
+All tracking is local and uses free, open-source software. Experiment and registry
+metadata are stored in SQLite at `artifacts/mlflow/mlflow.db`; packaged artifacts are
+stored under `artifacts/mlflow/artifacts/`. Both runtime locations are ignored by Git.
+No cloud account, Databricks workspace, external API, or paid service is required.
+
+The registered production model is `fraudshield-production-sgd` with alias
+`champion`. Its custom PyFunc interface accepts the five leakage-safe raw fields and
+returns `fraud_score`, a thresholded prediction, the frozen threshold, and a low,
+medium, or high risk level. The score is a ranking score, not a calibrated fraud
+probability. The XGBoost model is registered separately as
+`fraudshield-xgboost-benchmark` with alias `challenger`; it is not production-approved
+because the Phase 1D audit found substantial dependence on synthetic PaySim balance
+rules.
+
+Development validation metrics and the one-time final-holdout metrics are imported
+verbatim from existing JSON reports. Phase 2A does not open raw data or Parquet files,
+rescore data, recompute metrics, train models, or change thresholds. Stable checksum
+keys prevent duplicate equivalent runs and model versions when commands are rerun.
+
+Import or reuse the existing runs and model versions:
+
+```powershell
+.\.venv\Scripts\python.exe -m fraudshield.tracking.log_existing_runs
+```
+
+Verify experiments, aliases, duplicate prevention, stored metrics, and production
+PyFunc inference:
+
+```powershell
+.\.venv\Scripts\python.exe -m fraudshield.tracking.verify_registry
+```
+
+Start the local UI:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start_mlflow.ps1
+```
+
+The UI is available at `http://127.0.0.1:5000`. Tracked exports are
+`artifacts/mlflow/registry_snapshot.json` and
+`artifacts/mlflow/mlflow_manifest.json`; the SQLite database and model artifact store
+remain local runtime state.
