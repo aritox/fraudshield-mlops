@@ -20,13 +20,16 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /opt/fraudshield
 COPY --from=builder /wheels /tmp/wheels
+COPY --from=builder /build-wheels/prometheus_client-0.25.0-py3-none-any.whl /tmp/runtime-wheels/
 RUN python -m pip install --no-cache-dir \
       numpy==2.5.1 pandas==2.3.3 scikit-learn==1.9.0 joblib==1.5.3 \
       cloudpickle==3.1.2 PyYAML==6.0.3 pydantic==2.13.4 \
       fastapi==0.140.0 uvicorn==0.51.0 mlflow-skinny==3.14.0 \
       SQLAlchemy==2.0.51 "psycopg[binary]==3.3.4" alembic==1.18.5 \
+    && python -m pip install --no-cache-dir --no-index --find-links=/tmp/runtime-wheels \
+      prometheus-client==0.25.0 \
     && python -m pip install --no-cache-dir --no-deps /tmp/wheels/*.whl \
-    && rm -rf /tmp/wheels \
+    && rm -rf /tmp/wheels /tmp/runtime-wheels \
     && groupadd --gid 10001 fraudshield \
     && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin fraudshield
 

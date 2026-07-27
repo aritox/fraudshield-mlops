@@ -27,6 +27,7 @@ def test_openapi_and_manifest_export_without_model_loading(
         "/",
         "/health/live",
         "/health/ready",
+        "/metrics",
         "/model/info",
         "/predict",
         "/predict/batch",

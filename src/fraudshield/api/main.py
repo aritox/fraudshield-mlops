@@ -9,7 +9,8 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
+from prometheus_client import CONTENT_TYPE_LATEST
 
 from fraudshield.api.config import ApiConfig, load_api_config
 from fraudshield.api.errors import (
@@ -42,6 +43,7 @@ from fraudshield.api.schemas import (
     SinglePredictionResponse,
     TransactionRequest,
 )
+from fraudshield.monitoring.api_metrics import ApiMetrics, HttpMetricsMiddleware
 from fraudshield.persistence.config import load_database_config
 from fraudshield.persistence.database import DatabaseHealthService, create_database_runtime
 from fraudshield.persistence.schemas import (
@@ -80,6 +82,7 @@ def create_app(
     model_service: ProductionModelService | None = None,
     persistence_service: PredictionPersistenceService | None = None,
     database_health: DatabaseHealthService | None = None,
+    api_metrics: ApiMetrics | None = None,
     *,
     load_model_on_startup: bool | None = None,
 ) -> FastAPI:
@@ -87,6 +90,7 @@ def create_app(
 
     api_config = config or load_api_config()
     service = model_service or ProductionModelService(api_config)
+    metrics = api_metrics or ApiMetrics()
     runtime = None
     maximum_outcome_batch_size = 1000
     if persistence_service is None or database_health is None:
@@ -119,7 +123,9 @@ def create_app(
                         model_version=info["resolved_model_version"],
                     )
                 )
+                metrics.set_model_readiness(True, info)
             except ModelLoadError:
+                metrics.set_model_readiness(False)
                 LOGGER.error(_event("api_startup_not_ready", reason="model_load_failed"))
         else:
             LOGGER.info(_event("api_startup_model_loading_disabled"))
@@ -144,27 +150,38 @@ def create_app(
     application.state.model_service = service
     application.state.persistence_service = persistence_service
     application.state.database_health = database_health
+    application.state.api_metrics = metrics
     application.add_middleware(RequestContextMiddleware, logger=LOGGER)
+    application.add_middleware(
+        HttpMetricsMiddleware,
+        metrics=metrics,
+        excluded_paths={"/metrics"},
+    )
     install_error_handlers(application)
 
     def health_or_error() -> Any:
         if database_health is None:
+            metrics.set_database_readiness(False)
             raise DatabaseNotReadyError()
         health = database_health.status()
         if not health.healthy:
+            metrics.set_database_readiness(False)
             if health.error_code == "migration_not_current":
                 raise MigrationNotCurrentError()
             raise DatabaseNotReadyError()
+        metrics.set_database_readiness(True)
         return health
 
     def persistence_or_error() -> PredictionPersistenceService:
         if persistence_service is None:
+            metrics.persistence_failures.inc()
             raise PersistenceUnavailableApiError()
         if database_health is not None:
             health = database_health.status()
             if health.error_code == "migration_not_current":
                 raise MigrationNotCurrentError()
             if not health.healthy:
+                metrics.persistence_failures.inc()
                 raise PersistenceUnavailableApiError()
         return persistence_service
 
@@ -226,6 +243,17 @@ def create_app(
     async def model_info() -> ModelInfoResponse:
         return ModelInfoResponse(**service.model_info())
 
+    @application.get("/metrics", include_in_schema=True)
+    async def prometheus_metrics() -> Response:
+        model_ready = service.is_ready()
+        metrics.set_model_readiness(
+            model_ready,
+            service.model_info() if model_ready else None,
+        )
+        database_ready = database_health is not None and database_health.status().healthy
+        metrics.set_database_readiness(database_ready)
+        return Response(content=metrics.render(), media_type=CONTENT_TYPE_LATEST)
+
     def persisted_prediction(
         transactions: list[TransactionRequest], request: Request, endpoint: str
     ) -> Any:
@@ -268,10 +296,23 @@ def create_app(
                 scorer=score,
             )
         except IdempotencyConflictError as error:
+            metrics.idempotency_conflicts.inc()
             raise IdempotencyConflictApiError() from error
         except PersistenceUnavailableError as error:
+            metrics.persistence_failures.inc()
             raise PersistenceUnavailableApiError() from error
         request.state.idempotent_replay = result.replayed
+        if result.replayed:
+            metrics.idempotent_replays.inc()
+        else:
+            for transaction, prediction in zip(transactions, result.predictions, strict=True):
+                metrics.observe_prediction(
+                    prediction=prediction.prediction,
+                    risk_level=prediction.risk_level,
+                    transaction_type=transaction.type.value,
+                    model_version=result.model.version,
+                    fraud_score=prediction.fraud_score,
+                )
         request.state.batch_size = len(transactions)
         request.state.prediction_count = len(result.predictions)
         request.state.high_risk_prediction_count = sum(
@@ -345,6 +386,7 @@ def create_app(
         except PredictionNotFoundError as error:
             raise PredictionNotFoundApiError() from error
         except PersistenceUnavailableError as error:
+            metrics.persistence_failures.inc()
             raise PersistenceUnavailableApiError() from error
         outcome = OutcomeResponse(**vars(record.outcome)) if record.outcome else None
         values = vars(record) | {"outcome": outcome}
@@ -379,6 +421,7 @@ def create_app(
         except OutcomeConflictError as error:
             raise OutcomeConflictApiError() from error
         except PersistenceUnavailableError as error:
+            metrics.persistence_failures.inc()
             raise PersistenceUnavailableApiError() from error
         return OutcomeBatchResponse(
             outcomes=[OutcomeResponse(**vars(item)) for item in stored],

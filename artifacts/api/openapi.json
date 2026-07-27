@@ -963,6 +963,22 @@
         "summary": "Readiness"
       }
     },
+    "/metrics": {
+      "get": {
+        "operationId": "prometheus_metrics_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Prometheus Metrics"
+      }
+    },
     "/model/info": {
       "get": {
         "operationId": "model_info_model_info_get",

@@ -20,6 +20,9 @@ def test_dockerfile_runtime_contract() -> None:
     assert "COPY artifacts/docker_build_wheels/ /build-wheels/" in text
     assert "--no-index --find-links=/build-wheels" in text
     assert "--no-build-isolation" in text
+    assert "prometheus_client-0.25.0-py3-none-any.whl" in text
+    assert "--no-index --find-links=/tmp/runtime-wheels" in text
+    assert "prometheus-client==0.25.0" in text
     assert "--trusted-host" not in text
     assert "--index-url" not in text
     assert "PIP_NO_VERIFY_CERTS" not in text

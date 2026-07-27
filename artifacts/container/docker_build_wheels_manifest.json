@@ -17,6 +17,17 @@
       ]
     },
     {
+      "filename": "prometheus_client-0.25.0-py3-none-any.whl",
+      "name": "prometheus-client",
+      "relationship": "runtime dependency",
+      "resolved_version": "0.25.0",
+      "sha256": "d5aec89e349a6ec230805d0df882f3807f74fd6c1a2fa86864e3c2279059fed1",
+      "source": "pip_cache",
+      "tags": [
+        "py3-none-any"
+      ]
+    },
+    {
       "filename": "setuptools-83.0.0-py3-none-any.whl",
       "name": "setuptools",
       "relationship": "build-system requirement",
@@ -39,5 +50,5 @@
       ]
     }
   ],
-  "generation_timestamp_utc": "2026-07-26T17:44:33Z"
+  "generation_timestamp_utc": "2026-07-27T00:25:25Z"
 }

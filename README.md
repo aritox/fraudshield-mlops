@@ -1,6 +1,6 @@
 # FraudShield MLOps
 
-FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 2C: PostgreSQL prediction audit logging and Docker Compose**.
+FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 2D.1: FastAPI Prometheus operational metrics**.
 
 ## Dataset
 
@@ -27,7 +27,7 @@ fraudshield-mlops/
 │   ├── data/               # Data download and validation code
 │   ├── features/           # Reserved for later feature engineering
 │   ├── models/             # Reserved for later model training
-│   └── monitoring/         # Reserved for later monitoring
+│   └── monitoring/         # Bounded FastAPI Prometheus instrumentation
 └── tests/                  # Automated tests
 ```
 
@@ -526,5 +526,35 @@ Storing model inputs for real people or accounts requires data minimization, leg
 basis, access control, encryption in transit and at rest, retention/deletion rules,
 regional controls, and auditable authorization. This stack deliberately has no
 authentication or TLS and must not be exposed beyond localhost. Authentication,
-authorization, TLS, monitoring, queues, and production retention automation remain
-future phases.
+authorization, TLS, drift monitoring, queues, and production retention automation
+remain future phases.
+
+## Phase 2D.1 -- FastAPI Prometheus operational metrics
+
+The API exposes Prometheus text exposition at `GET /metrics` using the open-source
+`prometheus-client`. Each FastAPI application owns an isolated collector registry,
+so tests and repeated application construction cannot register duplicate collectors.
+The existing container still runs exactly one Uvicorn worker; Prometheus multiprocess
+mode is neither enabled nor required.
+
+Operational series cover normalized-route request counts and latency, newly persisted
+predictions, fraud-score histograms, idempotent replays and conflicts, persistence
+failures, model readiness, database readiness, and immutable model identity. Fraud
+scores are model decision scores, not calibrated probabilities. Labels are limited to
+bounded domains such as route templates, prediction class, risk level, transaction
+type, and model version. Request IDs, prediction IDs, amounts, balances, raw request
+bodies, account identifiers, credentials, and machine-specific paths are never metric
+labels.
+
+An identical idempotent replay increments only the replay counter. It returns the
+persisted prediction and does not invoke the model or duplicate prediction and score
+observations. A request-ID payload conflict increments the conflict counter and remains
+an HTTP 409 response. Existing `X-Request-ID`, `X-Process-Time-Ms`, and replay headers
+are unchanged.
+
+```powershell
+Invoke-WebRequest -Uri http://127.0.0.1:8000/metrics
+```
+
+This phase exposes metrics only. Drift detection, reference profiles, a monitoring
+worker, Prometheus storage, Grafana dashboards, and alert delivery remain future work.
