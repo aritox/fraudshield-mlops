@@ -1,0 +1,96 @@
+groups:
+  - name: fraudshield-recording-rules
+    interval: 15s
+    rules:
+      - record: fraudshield:http_request_rate:5m
+        expr: >-
+          sum by (method, normalized_route, status_class)
+          (rate(fraudshield_http_requests_total[5m]))
+
+      - record: fraudshield:http_error_rate:5m
+        expr: >-
+          sum(rate(fraudshield_http_requests_total{status_class="5xx"}[5m]))
+          /
+          clamp_min(sum(rate(fraudshield_http_requests_total[5m])), 0.000001)
+
+      - record: fraudshield:http_request_duration_seconds:p50_5m
+        expr: >-
+          histogram_quantile(0.50,
+          sum by (le, normalized_route)
+          (rate(fraudshield_http_request_duration_seconds_bucket[5m])))
+
+      - record: fraudshield:http_request_duration_seconds:p95_5m
+        expr: >-
+          histogram_quantile(0.95,
+          sum by (le, normalized_route)
+          (rate(fraudshield_http_request_duration_seconds_bucket[5m])))
+
+      - record: fraudshield:http_request_duration_seconds:p99_5m
+        expr: >-
+          histogram_quantile(0.99,
+          sum by (le, normalized_route)
+          (rate(fraudshield_http_request_duration_seconds_bucket[5m])))
+
+      - record: fraudshield:high_risk_prediction_rate:5m
+        expr: >-
+          sum(rate(fraudshield_predictions_total{risk_level="high"}[5m]))
+
+  - name: fraudshield-alert-rules
+    interval: 15s
+    rules:
+      - alert: FraudShieldAPIDown
+        expr: up{job="fraudshield-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: FraudShield API scrape target is unavailable
+          description: Prometheus has been unable to scrape the API for one minute.
+
+      - alert: FraudShieldDatabaseNotReady
+        expr: fraudshield_database_ready == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: FraudShield database is not ready
+          description: PostgreSQL connectivity or migration readiness is failing.
+
+      - alert: FraudShieldHighErrorRate
+        expr: fraudshield:http_error_rate:5m > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: FraudShield API error rate is elevated
+          description: Five-minute HTTP 5xx error ratio is above five percent.
+
+      - alert: FraudShieldHighP95Latency
+        expr: max(fraudshield:http_request_duration_seconds:p95_5m) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: FraudShield API p95 latency is elevated
+          description: Five-minute p95 request latency has exceeded one second.
+
+      - alert: FraudShieldMonitoringStale
+        expr: >-
+          fraudshield_monitoring_last_success_timestamp_seconds == 0
+          or
+          time() - fraudshield_monitoring_last_success_timestamp_seconds > 300
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: FraudShield monitoring results are stale
+          description: No successful monitoring calculation was observed recently.
+
+      - alert: FraudShieldSignificantFeatureDrift
+        expr: fraudshield_feature_drift_severity{severity="significant"} == 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: FraudShield feature drift is significant
+          description: At least one bounded production feature has PSI at or above 0.25.

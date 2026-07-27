@@ -37,7 +37,13 @@ def test_compose_security_and_ordering_contract() -> None:
     raw = Path("compose.yaml").read_text(encoding="utf-8")
     compose = yaml.safe_load(raw)
     assert "version" not in compose
-    assert set(compose["services"]) == {"postgres", "migrate", "api", "monitor"}
+    assert set(compose["services"]) == {
+        "postgres",
+        "migrate",
+        "api",
+        "monitor",
+        "prometheus",
+    }
     assert compose["services"]["postgres"]["image"] == "postgres:16-alpine"
     assert compose["services"]["api"]["read_only"] is True
     assert compose["services"]["api"]["cap_drop"] == ["ALL"]

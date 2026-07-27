@@ -610,3 +610,17 @@ Alembic revision `phase2d_001` owns the `monitoring_runs` and
 `monitoring_metrics` tables. Application startup does not call `create_all`.
 Prometheus storage, Grafana dashboards, external notifications, and automatic
 retraining remain outside this phase.
+
+## Phase 2D.4 -- Local Prometheus scraping and alert rules
+
+The local Compose stack adds pinned `prom/prometheus:v3.13.1`. Prometheus scrapes
+the API, the internal monitoring worker, and itself every 15 seconds. Its UI and
+query API are published only at `http://127.0.0.1:9090`; worker port `8001` remains
+private to the Compose network. Time-series data is retained for seven days in the
+`prometheus_data` named volume and survives a normal stack shutdown.
+
+Tracked recording rules calculate five-minute request and error rates, p50/p95/p99
+request latency, and high-risk prediction rate. Local alert rules cover API outage,
+database readiness, high error rate, high p95 latency, stale monitoring runs, and
+significant feature PSI. No Alertmanager, external notification channel, remote
+write, hosted service, or Grafana deployment is included in this phase.
