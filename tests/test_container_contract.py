@@ -15,6 +15,7 @@ def test_dockerfile_runtime_contract() -> None:
     assert "USER 10001:10001" in text
     assert "--reload" not in text
     assert '"0.0.0.0"' in text
+    assert "EXPOSE 8000 8001" in text
     assert "artifacts/mlflow" not in text
     assert "data/raw" not in text
     assert "data/processed" not in text
@@ -36,10 +37,16 @@ def test_compose_security_and_ordering_contract() -> None:
     raw = Path("compose.yaml").read_text(encoding="utf-8")
     compose = yaml.safe_load(raw)
     assert "version" not in compose
-    assert set(compose["services"]) == {"postgres", "migrate", "api"}
+    assert set(compose["services"]) == {"postgres", "migrate", "api", "monitor"}
     assert compose["services"]["postgres"]["image"] == "postgres:16-alpine"
     assert compose["services"]["api"]["read_only"] is True
     assert compose["services"]["api"]["cap_drop"] == ["ALL"]
+    monitor = compose["services"]["monitor"]
+    assert monitor["command"] == ["python", "-m", "fraudshield.monitoring.worker"]
+    assert monitor["expose"] == ["8001"]
+    assert "ports" not in monitor
+    assert monitor["read_only"] is True
+    assert monitor["cap_drop"] == ["ALL"]
     assert "service_completed_successfully" in raw
     assert "127.0.0.1:${FRAUDSHIELD_API_PORT:-8000}:8000" in raw
     assert "/var/run/docker.sock" not in raw

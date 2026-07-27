@@ -23,8 +23,12 @@ def _config(tmp_path: Path, **updates) -> Path:
 
 def test_monitoring_config_loads_focused_values(tmp_path: Path) -> None:
     config = load_monitoring_config(_config(tmp_path), root=tmp_path)
+    assert config.monitoring.interval_seconds == 60
     assert config.monitoring.window_hours == 24
     assert config.monitoring.minimum_events == 20
+    assert config.monitoring.minimum_labeled_events == 20
+    assert config.monitoring.metrics_host == "0.0.0.0"
+    assert config.monitoring.metrics_port == 8001
     assert config.reference.source_split == "train"
     assert config.reference.numeric_quantile_bins == 10
     assert config.reference.epsilon == pytest.approx(0.000001)
@@ -39,7 +43,11 @@ def test_monitoring_config_loads_focused_values(tmp_path: Path) -> None:
     ("section", "updates"),
     [
         ("monitoring", {"window_hours": 0}),
+        ("monitoring", {"interval_seconds": 0}),
         ("monitoring", {"minimum_events": 0}),
+        ("monitoring", {"minimum_labeled_events": 0}),
+        ("monitoring", {"metrics_host": ""}),
+        ("monitoring", {"metrics_port": 65536}),
         ("reference", {"source_split": "validation"}),
         ("reference", {"source_split": "test"}),
         ("reference", {"source_split": "raw"}),

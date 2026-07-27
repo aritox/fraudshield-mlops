@@ -11,7 +11,7 @@ from typing import Any
 
 from alembic.config import Config
 from alembic.script import ScriptDirectory
-from sqlalchemy import inspect, text
+from sqlalchemy import CheckConstraint, ForeignKeyConstraint, UniqueConstraint, inspect, text
 
 from fraudshield.data.config import repository_root
 from fraudshield.persistence.config import load_database_config
@@ -59,19 +59,68 @@ def verify_database(root: Path | None = None, *, write_manifest: bool = True) ->
             actual_tables = set(inspector.get_table_names())
             missing = sorted(expected_tables - actual_tables)
             if missing:
-                raise RuntimeError("Required prediction audit tables are missing")
+                raise RuntimeError("Required persistence tables are missing")
             objects = {}
             for table in sorted(expected_tables):
+                metadata_table = Base.metadata.tables[table]
+                expected_checks = {
+                    str(constraint.sqltext)
+                    for constraint in metadata_table.constraints
+                    if isinstance(constraint, CheckConstraint)
+                }
+                expected_uniques = {
+                    tuple(column.name for column in constraint.columns)
+                    for constraint in metadata_table.constraints
+                    if isinstance(constraint, UniqueConstraint)
+                }
+                expected_foreign_keys = {
+                    (
+                        tuple(element.parent.name for element in constraint.elements),
+                        constraint.referred_table.name,
+                        tuple(element.column.name for element in constraint.elements),
+                        next(iter(constraint.elements)).ondelete,
+                    )
+                    for constraint in metadata_table.constraints
+                    if isinstance(constraint, ForeignKeyConstraint)
+                }
+                expected_indexes = {index.name for index in metadata_table.indexes if index.name}
+                check_items = inspector.get_check_constraints(table)
+                unique_items = inspector.get_unique_constraints(table)
+                foreign_key_items = inspector.get_foreign_keys(table)
+                checks = {item["name"] for item in check_items if item["name"]}
+                uniques = {item["name"] for item in unique_items if item["name"]}
+                unique_columns = {
+                    tuple(item["column_names"])
+                    for item in unique_items
+                }
+                indexes = {item["name"] for item in inspector.get_indexes(table)}
+                foreign_keys = {
+                    item["name"] for item in foreign_key_items if item["name"]
+                }
+                foreign_key_signatures = {
+                    (
+                        tuple(item["constrained_columns"]),
+                        item["referred_table"],
+                        tuple(item["referred_columns"]),
+                        item["options"].get("ondelete"),
+                    )
+                    for item in foreign_key_items
+                }
+                primary_key = tuple(inspector.get_pk_constraint(table)["constrained_columns"])
+                expected_primary_key = tuple(column.name for column in metadata_table.primary_key)
+                if len(check_items) < len(expected_checks) or expected_uniques - unique_columns:
+                    raise RuntimeError(f"Required constraints are missing from {table}")
+                if expected_indexes - indexes:
+                    raise RuntimeError(f"Required indexes are missing from {table}")
+                if expected_foreign_keys - foreign_key_signatures:
+                    raise RuntimeError(f"Required foreign keys are missing from {table}")
+                if primary_key != expected_primary_key:
+                    raise RuntimeError(f"Primary key is invalid for {table}")
                 objects[table] = {
-                    "constraints": sorted(
-                        item["name"]
-                        for item in inspector.get_check_constraints(table)
-                        if item["name"]
-                    ),
-                    "indexes": sorted(item["name"] for item in inspector.get_indexes(table)),
-                    "foreign_keys": sorted(
-                        item["name"] for item in inspector.get_foreign_keys(table) if item["name"]
-                    ),
+                    "constraints": sorted(checks | uniques),
+                    "indexes": sorted(indexes),
+                    "foreign_keys": sorted(foreign_keys),
+                    "primary_key": list(primary_key),
                 }
     finally:
         runtime.engine.dispose()
@@ -95,6 +144,7 @@ def verify_database(root: Path | None = None, *, write_manifest: bool = True) ->
             "persistence_policy": "required; atomic request and event batches",
             "idempotency_policy": "UUID request ID plus canonical SHA-256 payload hash",
             "outcome_policy": "atomic delayed outcomes; immutable actual-fraud conflicts",
+            "monitoring_policy": "persisted predictions and delayed outcomes only",
             "migration_status": "current",
             "alembic_revision": head,
             "raw_data_accessed": False,

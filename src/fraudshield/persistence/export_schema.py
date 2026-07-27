@@ -1,4 +1,4 @@
-"""Export the Phase 2C schema manifest without reading production records."""
+"""Export the persistence schema manifest without reading production records."""
 
 from __future__ import annotations
 

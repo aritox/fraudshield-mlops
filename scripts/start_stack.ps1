@@ -25,11 +25,18 @@ try {
         $services = @($statusLines | ForEach-Object { $_ | ConvertFrom-Json })
         $postgres = $services | Where-Object { $_.Service -eq "postgres" }
         $api = $services | Where-Object { $_.Service -eq "api" }
+        $monitor = $services | Where-Object { $_.Service -eq "monitor" }
         $migrate = $services | Where-Object { $_.Service -eq "migrate" }
         $postgresHealth = if ($postgres) { $postgres.Health } else { "missing" }
         $apiHealth = if ($api) { $api.Health } else { "missing" }
+        $monitorHealth = if ($monitor) { $monitor.Health } else { "missing" }
         $migrateExit = if ($migrate) { [string]$migrate.ExitCode } else { "missing" }
-        if ($postgresHealth -eq "healthy" -and $apiHealth -eq "healthy" -and $migrateExit -eq "0") {
+        if (
+            $postgresHealth -eq "healthy" -and
+            $apiHealth -eq "healthy" -and
+            $monitorHealth -eq "healthy" -and
+            $migrateExit -eq "0"
+        ) {
             $healthy = $true
             break
         }
@@ -50,6 +57,6 @@ try {
 catch {
     Write-Error $_.Exception.Message
     & docker compose ps
-    & docker compose logs --tail 100 postgres migrate api
+    & docker compose logs --tail 100 postgres migrate api monitor
     exit 1
 }

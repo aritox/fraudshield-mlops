@@ -1,10 +1,139 @@
 {
-  "alembic_head_revision": "phase2c_001",
+  "alembic_head_revision": "phase2d_001",
   "parquet_data_accessed": false,
   "raw_data_accessed": false,
-  "schema_generation_timestamp_utc": "2026-07-26T15:53:04Z",
-  "source_git_commit": "5dd71a2b1a2c67ffd9c2c0529721b421e0953ea7",
+  "schema_generation_timestamp_utc": "2026-07-27T01:21:01Z",
+  "source_git_commit": "a7a7c69d9d19111eadb87484e38bc1cacdd06168",
   "tables": [
+    {
+      "check_constraints": [
+        {
+          "name": "ck_monitoring_runs_event_count_nonnegative",
+          "sql": "event_count >= 0"
+        },
+        {
+          "name": "ck_monitoring_runs_labeled_count_nonnegative",
+          "sql": "labeled_count >= 0"
+        },
+        {
+          "name": "ck_monitoring_runs_labeled_count_within_events",
+          "sql": "labeled_count <= event_count"
+        },
+        {
+          "name": "ck_monitoring_runs_overall_drift_status_valid",
+          "sql": "overall_drift_status IN ('stable','moderate','significant','insufficient_data','failed')"
+        },
+        {
+          "name": "ck_monitoring_runs_reference_version_nonempty",
+          "sql": "length(trim(reference_version)) > 0"
+        },
+        {
+          "name": "ck_monitoring_runs_status_valid",
+          "sql": "status IN ('completed','insufficient_data','insufficient_labeled_data','failed')"
+        },
+        {
+          "name": "ck_monitoring_runs_window_order_valid",
+          "sql": "window_end > window_start"
+        }
+      ],
+      "columns": [
+        {
+          "name": "run_id",
+          "nullable": false,
+          "primary_key": true,
+          "type": "UUID"
+        },
+        {
+          "name": "window_start",
+          "nullable": false,
+          "primary_key": false,
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "name": "window_end",
+          "nullable": false,
+          "primary_key": false,
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "name": "reference_version",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(64)"
+        },
+        {
+          "name": "event_count",
+          "nullable": false,
+          "primary_key": false,
+          "type": "INTEGER"
+        },
+        {
+          "name": "labeled_count",
+          "nullable": false,
+          "primary_key": false,
+          "type": "INTEGER"
+        },
+        {
+          "name": "status",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(32)"
+        },
+        {
+          "name": "overall_drift_status",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(32)"
+        },
+        {
+          "name": "created_at",
+          "nullable": false,
+          "primary_key": false,
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "name": "completed_at",
+          "nullable": true,
+          "primary_key": false,
+          "type": "TIMESTAMP WITH TIME ZONE"
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "columns": [
+            "created_at"
+          ],
+          "name": "ix_monitoring_runs_created_at",
+          "unique": false
+        },
+        {
+          "columns": [
+            "overall_drift_status"
+          ],
+          "name": "ix_monitoring_runs_overall_drift_status",
+          "unique": false
+        },
+        {
+          "columns": [
+            "window_end"
+          ],
+          "name": "ix_monitoring_runs_window_end",
+          "unique": false
+        }
+      ],
+      "name": "monitoring_runs",
+      "primary_keys": [
+        "run_id"
+      ],
+      "unique_constraints": [
+        [
+          "window_start",
+          "window_end",
+          "reference_version"
+        ]
+      ]
+    },
     {
       "check_constraints": [
         {
@@ -115,6 +244,129 @@
         "request_id"
       ],
       "unique_constraints": []
+    },
+    {
+      "check_constraints": [
+        {
+          "name": "ck_monitoring_metrics_metric_name_nonempty",
+          "sql": "length(trim(metric_name)) > 0"
+        },
+        {
+          "name": "ck_monitoring_metrics_metric_value_finite",
+          "sql": "metric_value IS NULL OR (metric_value > -1.7976931348623157e308 AND metric_value < 1.7976931348623157e308)"
+        },
+        {
+          "name": "ck_monitoring_metrics_sample_size_nonnegative",
+          "sql": "sample_size >= 0"
+        },
+        {
+          "name": "ck_monitoring_metrics_severity_valid",
+          "sql": "severity IN ('stable','moderate','significant','insufficient_data','informational','unavailable')"
+        }
+      ],
+      "columns": [
+        {
+          "name": "metric_id",
+          "nullable": false,
+          "primary_key": true,
+          "type": "UUID"
+        },
+        {
+          "name": "run_id",
+          "nullable": false,
+          "primary_key": false,
+          "type": "UUID"
+        },
+        {
+          "name": "metric_name",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(128)"
+        },
+        {
+          "name": "feature_name",
+          "nullable": true,
+          "primary_key": false,
+          "type": "VARCHAR(128)"
+        },
+        {
+          "name": "metric_value",
+          "nullable": true,
+          "primary_key": false,
+          "type": "FLOAT(53)"
+        },
+        {
+          "name": "severity",
+          "nullable": false,
+          "primary_key": false,
+          "type": "VARCHAR(32)"
+        },
+        {
+          "name": "sample_size",
+          "nullable": false,
+          "primary_key": false,
+          "type": "INTEGER"
+        },
+        {
+          "name": "created_at",
+          "nullable": false,
+          "primary_key": false,
+          "type": "TIMESTAMP WITH TIME ZONE"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "run_id"
+          ],
+          "ondelete": "CASCADE",
+          "referred_columns": [
+            "run_id"
+          ],
+          "referred_table": "monitoring_runs"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": [
+            "feature_name"
+          ],
+          "name": "ix_monitoring_metrics_feature_name",
+          "unique": false
+        },
+        {
+          "columns": [
+            "metric_name"
+          ],
+          "name": "ix_monitoring_metrics_metric_name",
+          "unique": false
+        },
+        {
+          "columns": [
+            "run_id"
+          ],
+          "name": "ix_monitoring_metrics_run_id",
+          "unique": false
+        },
+        {
+          "columns": [
+            "severity"
+          ],
+          "name": "ix_monitoring_metrics_severity",
+          "unique": false
+        }
+      ],
+      "name": "monitoring_metrics",
+      "primary_keys": [
+        "metric_id"
+      ],
+      "unique_constraints": [
+        [
+          "run_id",
+          "metric_name",
+          "feature_name"
+        ]
+      ]
     },
     {
       "check_constraints": [

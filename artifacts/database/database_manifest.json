@@ -1,16 +1,17 @@
 {
-  "alembic_revision": "phase2c_001",
+  "alembic_revision": "phase2d_001",
   "alembic_version": "1.18.5",
   "database_type": "PostgreSQL",
-  "generation_timestamp_utc": "2026-07-26T18:02:09Z",
+  "generation_timestamp_utc": "2026-07-27T01:37:31Z",
   "idempotency_policy": "UUID request ID plus canonical SHA-256 payload hash",
   "migration_status": "current",
+  "monitoring_policy": "persisted predictions and delayed outcomes only",
   "outcome_policy": "atomic delayed outcomes; immutable actual-fraud conflicts",
   "parquet_data_accessed": false,
   "persistence_policy": "required; atomic request and event batches",
   "postgresql_image_tag": "postgres:16-alpine",
   "psycopg_version": "3.3.4",
   "raw_data_accessed": false,
-  "source_git_commit": "5dd71a2b1a2c67ffd9c2c0529721b421e0953ea7",
+  "source_git_commit": "a7a7c69d9d19111eadb87484e38bc1cacdd06168",
   "sqlalchemy_version": "2.0.51"
 }

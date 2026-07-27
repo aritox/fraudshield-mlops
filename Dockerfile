@@ -42,7 +42,7 @@ COPY --chown=10001:10001 artifacts/monitoring/reference_profile.json ./artifacts
 COPY --chown=10001:10001 artifacts/monitoring/reference_manifest.json ./artifacts/monitoring/reference_manifest.json
 
 USER 10001:10001
-EXPOSE 8000
+EXPOSE 8000 8001
 HEALTHCHECK --interval=10s --timeout=3s --start-period=20s --retries=6 \
   CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2).read()"]
 CMD ["python", "-m", "uvicorn", "fraudshield.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

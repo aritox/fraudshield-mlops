@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-from fraudshield.persistence.models import Base
-
 
 def test_initial_revision_and_metadata_intent_match() -> None:
     migration = Path("alembic/versions/phase2c_001_create_prediction_audit_schema.py").read_text(
@@ -11,7 +9,7 @@ def test_initial_revision_and_metadata_intent_match() -> None:
     )
     assert 'revision = "phase2c_001"' in migration
     assert "down_revision = None" in migration
-    for table in Base.metadata.tables:
+    for table in ("prediction_requests", "prediction_events", "prediction_outcomes"):
         assert f'"{table}"' in migration
     assert migration.index('op.drop_table("prediction_outcomes")') < migration.index(
         'op.drop_table("prediction_events")'

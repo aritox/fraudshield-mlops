@@ -109,7 +109,7 @@ def _client(tmp_path: Path, service, maximum_batch_size: int = 1000, **kwargs):
     Base.metadata.create_all(engine)
     with engine.begin() as connection:
         connection.execute(text("CREATE TABLE alembic_version (version_num VARCHAR(32))"))
-        connection.execute(text("INSERT INTO alembic_version VALUES ('phase2c_001')"))
+        connection.execute(text("INSERT INTO alembic_version VALUES ('phase2d_001')"))
     persistence = PredictionPersistenceService(sessionmaker(bind=engine, expire_on_commit=False))
 
     class HealthyDatabase:

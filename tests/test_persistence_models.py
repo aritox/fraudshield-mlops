@@ -10,6 +10,8 @@ def test_expected_tables_columns_constraints_relationships_and_indexes() -> None
         "prediction_requests",
         "prediction_events",
         "prediction_outcomes",
+        "monitoring_runs",
+        "monitoring_metrics",
     }
     requests = Base.metadata.tables["prediction_requests"]
     events = Base.metadata.tables["prediction_events"]

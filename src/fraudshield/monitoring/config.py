@@ -17,8 +17,12 @@ CONFIG_RELATIVE_PATH = Path("configs/monitoring.yaml")
 
 @dataclass(frozen=True)
 class MonitoringWindowConfig:
+    interval_seconds: int
     window_hours: int
     minimum_events: int
+    minimum_labeled_events: int
+    metrics_host: str
+    metrics_port: int
 
 
 @dataclass(frozen=True)
@@ -84,7 +88,18 @@ def load_monitoring_config(
         raise ValueError("Monitoring configuration sections are invalid")
     _validate_safe_content(raw, repo_root)
 
-    monitoring = _section(raw, "monitoring", {"window_hours", "minimum_events"})
+    monitoring = _section(
+        raw,
+        "monitoring",
+        {
+            "interval_seconds",
+            "window_hours",
+            "minimum_events",
+            "minimum_labeled_events",
+            "metrics_host",
+            "metrics_port",
+        },
+    )
     reference = _section(
         raw,
         "reference",
@@ -96,10 +111,18 @@ def load_monitoring_config(
         {"stable_below", "moderate_below", "significant_at_or_above"},
     )
 
+    interval_seconds = int(monitoring["interval_seconds"])
     window_hours = int(monitoring["window_hours"])
     minimum_events = int(monitoring["minimum_events"])
-    if window_hours <= 0 or minimum_events <= 0:
-        raise ValueError("Monitoring window and minimum event count must be positive")
+    minimum_labeled_events = int(monitoring["minimum_labeled_events"])
+    metrics_host = str(monitoring["metrics_host"]).strip()
+    metrics_port = int(monitoring["metrics_port"])
+    if min(interval_seconds, window_hours, minimum_events, minimum_labeled_events) <= 0:
+        raise ValueError("Monitoring intervals, windows, and sample sizes must be positive")
+    if not metrics_host:
+        raise ValueError("Monitoring metrics host must be non-empty")
+    if not 1 <= metrics_port <= 65535:
+        raise ValueError("Monitoring metrics port is invalid")
 
     if reference["source_split"] != "train":
         raise ValueError("Reference source split must be exactly train")
@@ -132,7 +155,14 @@ def load_monitoring_config(
         raise ValueError("PSI thresholds must satisfy stable < moderate = significant")
 
     return MonitoringConfig(
-        monitoring=MonitoringWindowConfig(window_hours, minimum_events),
+        monitoring=MonitoringWindowConfig(
+            interval_seconds=interval_seconds,
+            window_hours=window_hours,
+            minimum_events=minimum_events,
+            minimum_labeled_events=minimum_labeled_events,
+            metrics_host=metrics_host,
+            metrics_port=metrics_port,
+        ),
         reference=ReferenceConfig(
             profile_path=profile_path,
             version=version,

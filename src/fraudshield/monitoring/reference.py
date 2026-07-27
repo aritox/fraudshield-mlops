@@ -11,11 +11,13 @@ from collections import Counter
 from collections.abc import Callable, Iterable, Iterator
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-import pyarrow as pa
-import pyarrow.parquet as pq
+
+if TYPE_CHECKING:
+    import pyarrow as pa
+    import pyarrow.parquet as pq
 
 from fraudshield.monitoring.config import MonitoringConfig
 from fraudshield.tracking.mlflow_setup import sha256_file, write_json
@@ -185,6 +187,8 @@ def _categorical_profile(
 
 def build_reference_profile(config: MonitoringConfig) -> tuple[dict[str, Any], dict[str, Any]]:
     """Read only the five permitted training columns and return aggregates."""
+
+    import pyarrow.parquet as pq
 
     root = config.repository_root
     install_reference_access_guard(root)

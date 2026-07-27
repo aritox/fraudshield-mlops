@@ -582,5 +582,31 @@ moderate, and values at or above `0.25` are significant. Windows containing fewe
 than 20 events report `insufficient_data`.
 
 PSI identifies distribution change; it is not proof of model failure, does not alter
-the frozen threshold, and never initiates retraining. This phase adds no worker,
-database tables, Prometheus service, or Grafana service.
+the frozen threshold, and never initiates retraining.
+
+## Phase 2D.3 -- Persistent monitoring worker
+
+The `monitor` Compose service reads only persisted prediction events and delayed
+outcomes from PostgreSQL plus the frozen aggregate training profile. Every 60 seconds
+it evaluates a trailing 24-hour window, persists a monitoring run and its metrics in
+one transaction, and exposes internal Prometheus metrics on port `8001`. That port is
+available only on the private Compose network and is not published to Windows.
+
+Feature PSI is stored alongside alert rate, mean fraud score, prediction distribution,
+risk-level distribution, and comparable aggregates from the preceding production
+window. Delayed-outcome precision, recall, F1, F2, false-positive rate, and fraud
+amount recall are calculated from the original stored predictions. Until at least 20
+labeled events exist, performance is explicitly unavailable and metric values are not
+fabricated as zeros. Monitoring never loads or invokes the production model.
+
+Run an explicit calculation while the stack is active with:
+
+```powershell
+.\.venv\Scripts\python.exe -m fraudshield.monitoring.run --once
+powershell -ExecutionPolicy Bypass -File scripts/run_monitoring_once.ps1
+```
+
+Alembic revision `phase2d_001` owns the `monitoring_runs` and
+`monitoring_metrics` tables. Application startup does not call `create_all`.
+Prometheus storage, Grafana dashboards, external notifications, and automatic
+retraining remain outside this phase.

@@ -20,7 +20,7 @@ class DatabaseRuntime:
     session_factory: sessionmaker[Session]
 
 
-EXPECTED_ALEMBIC_REVISION = "phase2c_001"
+EXPECTED_ALEMBIC_REVISION = "phase2d_001"
 
 
 @dataclass(frozen=True)

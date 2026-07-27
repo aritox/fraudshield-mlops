@@ -1,6 +1,10 @@
 monitoring:
+  interval_seconds: 60
   window_hours: 24
   minimum_events: 20
+  minimum_labeled_events: 20
+  metrics_host: 0.0.0.0
+  metrics_port: 8001
 
 reference:
   profile_path: artifacts/monitoring/reference_profile.json

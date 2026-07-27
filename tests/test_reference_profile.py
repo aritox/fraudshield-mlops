@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -11,7 +12,6 @@ import pyarrow.parquet as pq
 import pytest
 import yaml
 
-from fraudshield.monitoring import reference as reference_module
 from fraudshield.monitoring.config import load_monitoring_config
 from fraudshield.monitoring.reference import (
     SELECTED_COLUMNS,
@@ -22,6 +22,24 @@ from fraudshield.monitoring.reference import (
     validate_reference_source,
 )
 from fraudshield.tracking.mlflow_setup import sha256_file
+
+
+def test_runtime_reference_loader_has_no_top_level_pyarrow_dependency() -> None:
+    source = Path("src/fraudshield/monitoring/reference.py").read_text(encoding="utf-8")
+    module = ast.parse(source)
+    runtime_imports = [
+        node
+        for node in module.body
+        if isinstance(node, (ast.Import, ast.ImportFrom))
+    ]
+    assert not any(
+        (
+            isinstance(node, ast.Import)
+            and any(alias.name.startswith("pyarrow") for alias in node.names)
+        )
+        or (isinstance(node, ast.ImportFrom) and (node.module or "").startswith("pyarrow"))
+        for node in runtime_imports
+    )
 
 
 def _root(tmp_path: Path) -> tuple[Path, object]:
@@ -52,7 +70,7 @@ def test_reference_profile_is_deterministic_aggregate_and_selected_only(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _train, config = _root(tmp_path)
-    original_parquet_file = reference_module.pq.ParquetFile
+    original_parquet_file = pq.ParquetFile
     observed_columns: list[str] = []
 
     class ParquetProxy:
@@ -66,7 +84,7 @@ def test_reference_profile_is_deterministic_aggregate_and_selected_only(
             assert set(columns).issubset(SELECTED_COLUMNS)
             return self.inner.iter_batches(*args, **kwargs)
 
-    monkeypatch.setattr(reference_module.pq, "ParquetFile", ParquetProxy)
+    monkeypatch.setattr(pq, "ParquetFile", ParquetProxy)
     first, metadata = build_reference_profile(config)
     second, second_metadata = build_reference_profile(config)
 

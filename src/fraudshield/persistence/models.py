@@ -156,3 +156,94 @@ class PredictionOutcome(Base):
     )
 
     event: Mapped[PredictionEvent] = relationship(back_populates="outcome")
+
+
+class MonitoringRun(Base):
+    __tablename__ = "monitoring_runs"
+    __table_args__ = (
+        UniqueConstraint(
+            "window_start",
+            "window_end",
+            "reference_version",
+            name="uq_monitoring_runs_window_reference",
+        ),
+        CheckConstraint("window_end > window_start", name="window_order_valid"),
+        CheckConstraint("event_count >= 0", name="event_count_nonnegative"),
+        CheckConstraint("labeled_count >= 0", name="labeled_count_nonnegative"),
+        CheckConstraint("labeled_count <= event_count", name="labeled_count_within_events"),
+        CheckConstraint("length(trim(reference_version)) > 0", name="reference_version_nonempty"),
+        CheckConstraint(
+            "status IN ('completed','insufficient_data','insufficient_labeled_data','failed')",
+            name="status_valid",
+        ),
+        CheckConstraint(
+            "overall_drift_status IN "
+            "('stable','moderate','significant','insufficient_data','failed')",
+            name="overall_drift_status_valid",
+        ),
+        Index("ix_monitoring_runs_window_end", "window_end"),
+        Index("ix_monitoring_runs_created_at", "created_at"),
+        Index("ix_monitoring_runs_overall_drift_status", "overall_drift_status"),
+    )
+
+    run_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True)
+    window_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    window_end: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    reference_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    event_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    labeled_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    overall_drift_status: Mapped[str] = mapped_column(String(32), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    metrics: Mapped[list[MonitoringMetric]] = relationship(
+        back_populates="run", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+
+class MonitoringMetric(Base):
+    __tablename__ = "monitoring_metrics"
+    __table_args__ = (
+        UniqueConstraint(
+            "run_id",
+            "metric_name",
+            "feature_name",
+            name="uq_monitoring_metrics_run_name_feature",
+        ),
+        CheckConstraint("length(trim(metric_name)) > 0", name="metric_name_nonempty"),
+        CheckConstraint(
+            "metric_value IS NULL OR "
+            f"(metric_value > -{MAX_FINITE_DOUBLE} AND metric_value < {MAX_FINITE_DOUBLE})",
+            name="metric_value_finite",
+        ),
+        CheckConstraint(
+            "severity IN "
+            "('stable','moderate','significant','insufficient_data','informational','unavailable')",
+            name="severity_valid",
+        ),
+        CheckConstraint("sample_size >= 0", name="sample_size_nonnegative"),
+        Index("ix_monitoring_metrics_run_id", "run_id"),
+        Index("ix_monitoring_metrics_metric_name", "metric_name"),
+        Index("ix_monitoring_metrics_feature_name", "feature_name"),
+        Index("ix_monitoring_metrics_severity", "severity"),
+    )
+
+    metric_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True)
+    run_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("monitoring_runs.run_id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    metric_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    feature_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    metric_value: Mapped[float | None] = mapped_column(Float(53), nullable=True)
+    severity: Mapped[str] = mapped_column(String(32), nullable=False)
+    sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now
+    )
+
+    run: Mapped[MonitoringRun] = relationship(back_populates="metrics")
