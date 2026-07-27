@@ -1,0 +1,24 @@
+{
+  "generation_timestamp_utc": "2026-07-27T00:50:26Z",
+  "label_accessed": false,
+  "profile_sha256": "618164a882ea8f4bd699d27b4ce65e25baca8190cc06de1dbfd939efa036cbcc",
+  "profile_version": "phase2d_train_v1",
+  "raw_data_accessed": false,
+  "raw_rows_stored": false,
+  "selected_columns": [
+    "step",
+    "type",
+    "amount",
+    "oldbalanceOrg",
+    "oldbalanceDest"
+  ],
+  "source_git_commit": "c3295fafb60c57180716e4b25de7b49acb75d010",
+  "source_provenance_kind": "ordered_selected_columns_sha256",
+  "source_row_count": 4463587,
+  "source_selected_columns_sha256": "2b958f6212445ef50e4bc064a31ad239e556003b6afa7a4100509a6d1dd2599a",
+  "source_split": "train",
+  "source_step_maximum": 323,
+  "source_step_minimum": 1,
+  "test_accessed": false,
+  "validation_accessed": false
+}

@@ -1,0 +1,15 @@
+monitoring:
+  window_hours: 24
+  minimum_events: 20
+
+reference:
+  profile_path: artifacts/monitoring/reference_profile.json
+  version: phase2d_train_v1
+  source_split: train
+  numeric_quantile_bins: 10
+  epsilon: 0.000001
+
+drift:
+  stable_below: 0.10
+  moderate_below: 0.25
+  significant_at_or_above: 0.25

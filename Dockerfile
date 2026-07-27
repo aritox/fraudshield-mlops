@@ -33,11 +33,13 @@ RUN python -m pip install --no-cache-dir \
     && groupadd --gid 10001 fraudshield \
     && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin fraudshield
 
-COPY --chown=10001:10001 configs/api.yaml configs/database.yaml configs/mlflow.yaml ./configs/
+COPY --chown=10001:10001 configs/api.yaml configs/database.yaml configs/mlflow.yaml configs/monitoring.yaml ./configs/
 COPY --chown=10001:10001 alembic.ini ./
 COPY --chown=10001:10001 alembic/ ./alembic/
 COPY --chown=10001:10001 artifacts/container_model/production_sgd/ ./model/production_sgd/
 COPY --chown=10001:10001 artifacts/container/model_package_manifest.json ./artifacts/container/model_package_manifest.json
+COPY --chown=10001:10001 artifacts/monitoring/reference_profile.json ./artifacts/monitoring/reference_profile.json
+COPY --chown=10001:10001 artifacts/monitoring/reference_manifest.json ./artifacts/monitoring/reference_manifest.json
 
 USER 10001:10001
 EXPOSE 8000

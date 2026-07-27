@@ -86,6 +86,10 @@ htmlcov/
 /artifacts/api/*
 !/artifacts/api/openapi.json
 !/artifacts/api/api_manifest.json
+!/artifacts/monitoring/
+/artifacts/monitoring/*
+!/artifacts/monitoring/reference_profile.json
+!/artifacts/monitoring/reference_manifest.json
 
 # MLflow runs
 /mlruns/

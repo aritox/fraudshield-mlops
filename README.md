@@ -1,6 +1,6 @@
 # FraudShield MLOps
 
-FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 2D.1: FastAPI Prometheus operational metrics**.
+FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 2D.2: frozen training reference and PSI drift engine**.
 
 ## Dataset
 
@@ -27,7 +27,7 @@ fraudshield-mlops/
 │   ├── data/               # Data download and validation code
 │   ├── features/           # Reserved for later feature engineering
 │   ├── models/             # Reserved for later model training
-│   └── monitoring/         # Bounded FastAPI Prometheus instrumentation
+│   └── monitoring/         # API metrics, frozen reference, and PSI calculations
 └── tests/                  # Automated tests
 ```
 
@@ -556,5 +556,31 @@ are unchanged.
 Invoke-WebRequest -Uri http://127.0.0.1:8000/metrics
 ```
 
-This phase exposes metrics only. Drift detection, reference profiles, a monitoring
-worker, Prometheus storage, Grafana dashboards, and alert delivery remain future work.
+Phase 2D.1 exposes metrics only. The frozen reference and offline PSI calculations are
+implemented separately in Phase 2D.2; a monitoring worker, Prometheus storage,
+Grafana dashboards, and alert delivery remain future work.
+
+## Phase 2D.2 -- Frozen training reference and PSI drift engine
+
+The deterministic reference exporter reads only `step`, `type`, `amount`,
+`oldbalanceOrg`, and `oldbalanceDest` from `data/processed/train.parquet`. It never
+reads the raw CSV, validation or final-test Parquet, labels, identifiers, or
+post-transaction balance fields. The tracked profile contains aggregate quantile
+bins, counts, proportions, ranges, and missing counts—never raw rows or samples.
+Monetary values are represented with `log1p`; `step` remains untransformed and
+`type` uses an explicit unknown-category bucket.
+
+```powershell
+.\.venv\Scripts\python.exe -m fraudshield.monitoring.export_reference
+```
+
+Population Stability Index is calculated over frozen reference bins as
+`sum((current - reference) * ln(current / reference))`. Epsilon smoothing keeps
+zero-count buckets finite, and values outside the frozen numeric range remain in the
+edge bins. PSI below `0.10` is stable, values from `0.10` to below `0.25` are
+moderate, and values at or above `0.25` are significant. Windows containing fewer
+than 20 events report `insufficient_data`.
+
+PSI identifies distribution change; it is not proof of model failure, does not alter
+the frozen threshold, and never initiates retraining. This phase adds no worker,
+database tables, Prometheus service, or Grafana service.

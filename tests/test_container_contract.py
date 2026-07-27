@@ -17,6 +17,10 @@ def test_dockerfile_runtime_contract() -> None:
     assert '"0.0.0.0"' in text
     assert "artifacts/mlflow" not in text
     assert "data/raw" not in text
+    assert "data/processed" not in text
+    assert "configs/monitoring.yaml" in text
+    assert "artifacts/monitoring/reference_profile.json" in text
+    assert "artifacts/monitoring/reference_manifest.json" in text
     assert "COPY artifacts/docker_build_wheels/ /build-wheels/" in text
     assert "--no-index --find-links=/build-wheels" in text
     assert "--no-build-isolation" in text
