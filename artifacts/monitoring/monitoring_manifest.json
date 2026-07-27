@@ -1,0 +1,112 @@
+{
+  "alembic_revision": "phase2d_001",
+  "api_image": {
+    "id": "sha256:4056c213f6c21d4a555ff02fd17e285c048d443648b42c4530bad4b45ab2536e",
+    "runtime_user": "10001:10001",
+    "size_bytes": 190791446
+  },
+  "dashboard": {
+    "panel_titles": [
+      "API health",
+      "Database readiness",
+      "Monitoring worker freshness",
+      "Request rate",
+      "Error rate",
+      "p50 latency",
+      "p95 latency",
+      "p99 latency",
+      "Predictions by risk level",
+      "Predictions by transaction type",
+      "High-risk alert rate",
+      "Fraud-score histogram",
+      "Monitoring-window event count",
+      "Feature PSI",
+      "Feature drift severity",
+      "Labeled outcome count",
+      "Precision",
+      "Recall",
+      "F2",
+      "Monitoring-run status"
+    ],
+    "title": "FraudShield Production Monitoring",
+    "uid": "fraudshield-production-monitoring"
+  },
+  "generation_timestamp_utc": "2026-07-27T02:26:03Z",
+  "grafana_image": {
+    "digest": "grafana/grafana@sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+    "id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+    "tag": "grafana/grafana:13.1.0"
+  },
+  "historical_metrics_recomputed": false,
+  "minimum_events": 20,
+  "minimum_labeled_events": 20,
+  "model": {
+    "alias": "champion",
+    "family": "SGDClassifier",
+    "name": "fraudshield-production-sgd",
+    "threshold": 0.98310834,
+    "version": "1"
+  },
+  "model_retrained": false,
+  "monitored_features": [
+    "step",
+    "type",
+    "log1p(amount)",
+    "log1p(oldbalanceOrg)",
+    "log1p(oldbalanceDest)"
+  ],
+  "monitoring_interval_seconds": 60,
+  "monitoring_tables": [
+    "monitoring_runs",
+    "monitoring_metrics"
+  ],
+  "monitoring_version": "phase2d.5",
+  "monitoring_window_hours": 24,
+  "prometheus": {
+    "alert_rules": [
+      "FraudShieldAPIDown",
+      "FraudShieldDatabaseNotReady",
+      "FraudShieldHighErrorRate",
+      "FraudShieldHighP95Latency",
+      "FraudShieldMonitoringStale",
+      "FraudShieldSignificantFeatureDrift"
+    ],
+    "endpoints": [
+      "api:8000/metrics",
+      "monitor:8001/metrics",
+      "prometheus:9090/metrics"
+    ],
+    "recording_rules": [
+      "fraudshield:http_request_rate:5m",
+      "fraudshield:http_error_rate:5m",
+      "fraudshield:http_request_duration_seconds:p50_5m",
+      "fraudshield:http_request_duration_seconds:p95_5m",
+      "fraudshield:http_request_duration_seconds:p99_5m",
+      "fraudshield:high_risk_prediction_rate:5m"
+    ]
+  },
+  "prometheus_client_version": "0.25.0",
+  "prometheus_image": {
+    "digest": "prom/prometheus@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893",
+    "id": "sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893",
+    "tag": "prom/prometheus:v3.13.1"
+  },
+  "psi_thresholds": {
+    "moderate_below": 0.25,
+    "significant_at_or_above": 0.25,
+    "stable_below": 0.1
+  },
+  "raw_data_accessed": false,
+  "reference_profile": {
+    "checksum": "618164a882ea8f4bd699d27b4ce65e25baca8190cc06de1dbfd939efa036cbcc",
+    "version": "phase2d_train_v1"
+  },
+  "source_git_commit": "53d50f9efa344bf74382dabdf1323d649902c3a8",
+  "test_accessed": false,
+  "validation_accessed": false,
+  "volumes": [
+    "fraudshield_postgres_data",
+    "fraudshield_prometheus_data",
+    "fraudshield_grafana_data"
+  ]
+}

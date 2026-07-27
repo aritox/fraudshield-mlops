@@ -90,6 +90,8 @@ htmlcov/
 /artifacts/monitoring/*
 !/artifacts/monitoring/reference_profile.json
 !/artifacts/monitoring/reference_manifest.json
+!/artifacts/monitoring/monitoring_manifest.json
+!/artifacts/monitoring/monitoring_smoke_report.json
 
 # MLflow runs
 /mlruns/

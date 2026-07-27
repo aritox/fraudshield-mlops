@@ -1,17 +1,25 @@
 {
-  "api_image_identifier": "sha256:59918ff580e207a00e34cf465f6007fd6fb0819d9ca967fadd2a59cdfc550600",
-  "api_image_size_bytes": 190470183,
+  "api_image_identifier": "sha256:4056c213f6c21d4a555ff02fd17e285c048d443648b42c4530bad4b45ab2536e",
+  "api_image_size_bytes": 190791446,
   "base_python_image": "python:3.12-slim-bookworm",
   "compose_service_names": [
     "postgres",
     "migrate",
-    "api"
+    "api",
+    "monitor",
+    "prometheus",
+    "grafana"
   ],
   "credentials_included": false,
   "exposed_container_port": 8000,
-  "generation_timestamp_utc": "2026-07-26T17:58:02Z",
+  "generation_timestamp_utc": "2026-07-27T02:26:03Z",
   "health_check_status": {
     "api": {
+      "exit_code": 0,
+      "health": "healthy",
+      "state": "running"
+    },
+    "grafana": {
       "exit_code": 0,
       "health": "healthy",
       "state": "running"
@@ -21,20 +29,37 @@
       "health": "not_applicable",
       "state": "exited"
     },
+    "monitor": {
+      "exit_code": 0,
+      "health": "healthy",
+      "state": "running"
+    },
     "postgres": {
+      "exit_code": 0,
+      "health": "healthy",
+      "state": "running"
+    },
+    "prometheus": {
       "exit_code": 0,
       "health": "healthy",
       "state": "running"
     }
   },
-  "image_creation_timestamp_utc": "2026-07-26T17:54:26.248733111Z",
+  "image_creation_timestamp_utc": "2026-07-27T02:21:22.524260564Z",
   "non_root": true,
   "packaged_model_checksum": "c75513da35e2b1020dcf15a1f20255b74ddcaba4967b9f21dbe91479601642c5",
   "packaged_model_name": "fraudshield-production-sgd",
   "packaged_model_version": "1",
   "parquet_data_included": false,
   "postgresql_host_binding": "127.0.0.1:55432",
+  "prometheus_host_binding": "127.0.0.1:9090",
+  "grafana_host_binding": "127.0.0.1:3000",
   "published_host_binding": "127.0.0.1:8000",
   "raw_data_included": false,
-  "source_joblib_included": false
+  "source_joblib_included": false,
+  "volumes": [
+    "fraudshield_postgres_data",
+    "fraudshield_prometheus_data",
+    "fraudshield_grafana_data"
+  ]
 }

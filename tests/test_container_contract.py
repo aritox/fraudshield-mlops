@@ -43,6 +43,7 @@ def test_compose_security_and_ordering_contract() -> None:
         "api",
         "monitor",
         "prometheus",
+        "grafana",
     }
     assert compose["services"]["postgres"]["image"] == "postgres:16-alpine"
     assert compose["services"]["api"]["read_only"] is True

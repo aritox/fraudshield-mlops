@@ -31,7 +31,6 @@ def test_prometheus_compose_service_is_pinned_local_and_persistent() -> None:
     )
     assert "/var/run/docker.sock" not in raw
     assert "remote_write" not in raw
-    assert "grafana" not in compose["services"]
 
 
 def test_stack_scripts_report_health_and_preserve_prometheus_volume() -> None:

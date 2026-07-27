@@ -1,0 +1,228 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Whether Prometheus can scrape the FraudShield API.",
+      "fieldConfig": {"defaults": {"unit": "short", "min": 0, "max": 1}, "overrides": []},
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"editorMode": "code", "expr": "min(up{job=\"fraudshield-api\"})", "legendFormat": "API scrape health", "range": true, "refId": "A"}],
+      "title": "API health",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Database connectivity and migration readiness reported by the API.",
+      "fieldConfig": {"defaults": {"unit": "short", "min": 0, "max": 1}, "overrides": []},
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 0},
+      "id": 2,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"editorMode": "code", "expr": "fraudshield_database_ready", "legendFormat": "PostgreSQL ready", "range": true, "refId": "A"}],
+      "title": "Database readiness",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Seconds since the most recent successful monitoring calculation.",
+      "fieldConfig": {"defaults": {"unit": "s", "min": 0}, "overrides": []},
+      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 0},
+      "id": 3,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"editorMode": "code", "expr": "time() - fraudshield_monitoring_last_success_timestamp_seconds", "legendFormat": "Worker age", "range": true, "refId": "A"}],
+      "title": "Monitoring worker freshness",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Five-minute API request rate by method and normalized route.",
+      "fieldConfig": {"defaults": {"unit": "reqps", "min": 0}, "overrides": []},
+      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 0},
+      "id": 4,
+      "targets": [{"editorMode": "code", "expr": "fraudshield:http_request_rate:5m", "legendFormat": "{{method}} {{normalized_route}} {{status_class}}", "range": true, "refId": "A"}],
+      "title": "Request rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Fraction of API traffic returning 4xx or 5xx responses.",
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}, "overrides": []},
+      "gridPos": {"h": 7, "w": 6, "x": 0, "y": 5},
+      "id": 5,
+      "targets": [{"editorMode": "code", "expr": "fraudshield:http_error_rate:5m", "legendFormat": "Error rate", "range": true, "refId": "A"}],
+      "title": "Error rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Median API request latency over five minutes.",
+      "fieldConfig": {"defaults": {"unit": "s", "min": 0}, "overrides": []},
+      "gridPos": {"h": 7, "w": 6, "x": 6, "y": 5},
+      "id": 6,
+      "targets": [{"editorMode": "code", "expr": "fraudshield:http_request_duration_seconds:p50_5m", "legendFormat": "p50 {{method}} {{normalized_route}}", "range": true, "refId": "A"}],
+      "title": "p50 latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "95th percentile API request latency over five minutes.",
+      "fieldConfig": {"defaults": {"unit": "s", "min": 0}, "overrides": []},
+      "gridPos": {"h": 7, "w": 6, "x": 12, "y": 5},
+      "id": 7,
+      "targets": [{"editorMode": "code", "expr": "fraudshield:http_request_duration_seconds:p95_5m", "legendFormat": "p95 {{method}} {{normalized_route}}", "range": true, "refId": "A"}],
+      "title": "p95 latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "99th percentile API request latency over five minutes.",
+      "fieldConfig": {"defaults": {"unit": "s", "min": 0}, "overrides": []},
+      "gridPos": {"h": 7, "w": 6, "x": 18, "y": 5},
+      "id": 8,
+      "targets": [{"editorMode": "code", "expr": "fraudshield:http_request_duration_seconds:p99_5m", "legendFormat": "p99 {{method}} {{normalized_route}}", "range": true, "refId": "A"}],
+      "title": "p99 latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "New prediction throughput grouped by bounded risk level.",
+      "fieldConfig": {"defaults": {"unit": "ops", "min": 0}, "overrides": []},
+      "gridPos": {"h": 7, "w": 8, "x": 0, "y": 12},
+      "id": 9,
+      "targets": [{"editorMode": "code", "expr": "sum by (risk_level) (rate(fraudshield_predictions_total[5m]))", "legendFormat": "{{risk_level}}", "range": true, "refId": "A"}],
+      "title": "Predictions by risk level",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "New prediction throughput grouped by bounded transaction type.",
+      "fieldConfig": {"defaults": {"unit": "ops", "min": 0}, "overrides": []},
+      "gridPos": {"h": 7, "w": 8, "x": 8, "y": 12},
+      "id": 10,
+      "targets": [{"editorMode": "code", "expr": "sum by (transaction_type) (rate(fraudshield_predictions_total[5m]))", "legendFormat": "{{transaction_type}}", "range": true, "refId": "A"}],
+      "title": "Predictions by transaction type",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Five-minute rate of newly inferred high-risk alerts.",
+      "fieldConfig": {"defaults": {"unit": "ops", "min": 0}, "overrides": []},
+      "gridPos": {"h": 7, "w": 8, "x": 16, "y": 12},
+      "id": 11,
+      "targets": [{"editorMode": "code", "expr": "fraudshield:high_risk_prediction_rate:5m", "legendFormat": "High-risk predictions", "range": true, "refId": "A"}],
+      "title": "High-risk alert rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Distribution of uncalibrated production fraud scores.",
+      "fieldConfig": {"defaults": {"unit": "short", "min": 0}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 19},
+      "id": 12,
+      "options": {"calculate": false, "cellGap": 1, "color": {"exponent": 0.5, "fill": "dark-orange", "mode": "scheme", "reverse": false, "scale": "exponential", "scheme": "Oranges", "steps": 64}, "filterValues": {"le": 1e-9}, "legend": {"show": true}, "rowsFrame": {"layout": "auto"}, "tooltip": {"mode": "single", "showColorScale": false, "yHistogram": false}},
+      "targets": [{"editorMode": "code", "expr": "sum by (le) (rate(fraudshield_prediction_score_bucket[5m]))", "format": "heatmap", "legendFormat": "Score bucket {{le}}", "range": true, "refId": "A"}],
+      "title": "Fraud-score histogram",
+      "type": "heatmap"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Persisted production predictions in the current monitoring window.",
+      "fieldConfig": {"defaults": {"unit": "short", "min": 0}, "overrides": []},
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 19},
+      "id": 13,
+      "targets": [{"editorMode": "code", "expr": "fraudshield_monitoring_window_events", "legendFormat": "Window events", "range": true, "refId": "A"}],
+      "title": "Monitoring-window event count",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "PSI against the frozen training reference for each monitored feature.",
+      "fieldConfig": {"defaults": {"unit": "short", "min": 0}, "overrides": []},
+      "gridPos": {"h": 8, "w": 6, "x": 18, "y": 19},
+      "id": 14,
+      "targets": [{"editorMode": "code", "expr": "fraudshield_feature_psi", "legendFormat": "{{feature}}", "range": true, "refId": "A"}],
+      "title": "Feature PSI",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "One-hot bounded severity state for each monitored feature.",
+      "fieldConfig": {"defaults": {"unit": "short", "min": 0, "max": 1}, "overrides": []},
+      "gridPos": {"h": 7, "w": 8, "x": 0, "y": 27},
+      "id": 15,
+      "targets": [{"editorMode": "code", "expr": "fraudshield_feature_drift_severity == 1", "legendFormat": "{{feature}}: {{severity}}", "range": true, "refId": "A"}],
+      "title": "Feature drift severity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Predictions with delayed outcomes in the monitoring window.",
+      "fieldConfig": {"defaults": {"unit": "short", "min": 0}, "overrides": []},
+      "gridPos": {"h": 7, "w": 8, "x": 8, "y": 27},
+      "id": 16,
+      "targets": [{"editorMode": "code", "expr": "fraudshield_monitoring_labeled_events", "legendFormat": "Labeled outcomes", "range": true, "refId": "A"}],
+      "title": "Labeled outcome count",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Production precision when the labeled sample threshold is satisfied.",
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}, "overrides": []},
+      "gridPos": {"h": 7, "w": 4, "x": 16, "y": 27},
+      "id": 17,
+      "targets": [{"editorMode": "code", "expr": "fraudshield_production_precision", "legendFormat": "Precision", "range": true, "refId": "A"}],
+      "title": "Precision",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Production recall when the labeled sample threshold is satisfied.",
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}, "overrides": []},
+      "gridPos": {"h": 7, "w": 4, "x": 20, "y": 27},
+      "id": 18,
+      "targets": [{"editorMode": "code", "expr": "fraudshield_production_recall", "legendFormat": "Recall", "range": true, "refId": "A"}],
+      "title": "Recall",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Production F2 when the labeled sample threshold is satisfied.",
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}, "overrides": []},
+      "gridPos": {"h": 7, "w": 12, "x": 0, "y": 34},
+      "id": 19,
+      "targets": [{"editorMode": "code", "expr": "fraudshield_production_f2", "legendFormat": "F2", "range": true, "refId": "A"}],
+      "title": "F2",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Current bounded monitoring-run status label.",
+      "fieldConfig": {"defaults": {"unit": "short", "min": 0, "max": 1}, "overrides": []},
+      "gridPos": {"h": 7, "w": 12, "x": 12, "y": 34},
+      "id": 20,
+      "targets": [{"editorMode": "code", "expr": "fraudshield_monitoring_run_status == 1", "legendFormat": "{{status}}", "range": true, "refId": "A"}],
+      "title": "Monitoring-run status",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 41,
+  "tags": ["fraudshield", "production-monitoring"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "FraudShield Production Monitoring",
+  "uid": "fraudshield-production-monitoring",
+  "version": 1,
+  "weekStart": ""
+}

@@ -1,0 +1,69 @@
+{
+  "api_metrics": {
+    "dashboard_promql_queries_valid": 20,
+    "feature_psi_series": 5,
+    "prediction_metrics_queryable": true,
+    "request_rate_queryable": true,
+    "worker_metrics_queryable": true
+  },
+  "database_row_counts": {
+    "monitoring_metrics": 120,
+    "monitoring_runs": 6,
+    "prediction_events": 24,
+    "prediction_outcomes": 4,
+    "prediction_requests": 14
+  },
+  "grafana": {
+    "dashboard_panel_count": 20,
+    "dashboard_provisioned": true,
+    "dashboard_title": "FraudShield Production Monitoring",
+    "database_status": "ok",
+    "datasource_default": true,
+    "datasource_health": "OK",
+    "datasource_url": "http://prometheus:9090",
+    "health": "healthy",
+    "version": "13.1.0"
+  },
+  "monitoring_run": {
+    "event_count": 24,
+    "labeled_count": 4,
+    "overall_drift_status": "significant",
+    "performance_available": false,
+    "run_id": "2c5bfb68-fc66-43f5-9a0b-c37ceb09b849",
+    "status": "insufficient_labeled_data"
+  },
+  "prometheus_rules": {
+    "alert_rules_healthy": 6,
+    "alert_rules_total": 6,
+    "recording_rules_healthy": 6,
+    "recording_rules_total": 6
+  },
+  "prometheus_targets": {
+    "fraudshield-api": "up",
+    "fraudshield-monitor": "up",
+    "prometheus": "up"
+  },
+  "raw_data_accessed": false,
+  "service_health": {
+    "api": "healthy",
+    "grafana": "healthy",
+    "migrate": "exited_0",
+    "monitor": "healthy",
+    "postgres": "healthy",
+    "prometheus": "healthy"
+  },
+  "smoke_status": "passed",
+  "synthetic_prediction": {
+    "prediction_id": "91a338a3-cb0a-4a2c-b25e-52e238708e88",
+    "request_id": "b0bf5a3f-eb5c-4073-8cd7-3a311bf3ef13"
+  },
+  "synthetic_requests_only": true,
+  "test_accessed": false,
+  "timestamp_utc": "2026-07-27T02:26:03Z",
+  "validation_accessed": false,
+  "volume_preservation": {
+    "fraudshield_grafana_data": true,
+    "fraudshield_postgres_data": true,
+    "fraudshield_prometheus_data": true
+  }
+}

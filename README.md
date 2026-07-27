@@ -1,6 +1,6 @@
 # FraudShield MLOps
 
-FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 2D.2: frozen training reference and PSI drift engine**.
+FraudShield is a production-style fraud detection MLOps project built with free and open-source Python tooling. The current phase is **Phase 2D.5: Grafana dashboard and final local monitoring stack**.
 
 ## Dataset
 
@@ -623,4 +623,40 @@ Tracked recording rules calculate five-minute request and error rates, p50/p95/p
 request latency, and high-risk prediction rate. Local alert rules cover API outage,
 database readiness, high error rate, high p95 latency, stale monitoring runs, and
 significant feature PSI. No Alertmanager, external notification channel, remote
-write, hosted service, or Grafana deployment is included in this phase.
+write, or hosted service is included in this phase.
+
+## Phase 2D.5 -- Grafana dashboard and final local monitoring stack
+
+The final local monitoring stack adds pinned `grafana/grafana:13.1.0` and provisions
+Prometheus as Grafana's default data source over the private Compose network at
+`http://prometheus:9090`. The tracked **FraudShield Production Monitoring** dashboard
+covers API and database health, monitoring freshness, request/error rates, latency
+percentiles, prediction behavior, fraud-score histograms, window sizes, feature PSI
+and severity, delayed-outcome performance, and monitoring-run status. Dashboard and
+data-source definitions are versioned files; no plugin is downloaded at startup and
+no Grafana Cloud account is used.
+
+Grafana state persists in the `grafana_data` named volume, alongside the existing
+`postgres_data` and `prometheus_data` volumes. A normal `docker compose down` removes
+containers and the private network but preserves all three volumes.
+
+For this localhost-only demonstration, anonymous users receive the Viewer role,
+sign-up is disabled, analytics and update checks are disabled, and the admin password
+is generated into ignored `.env` without being printed. Anonymous access must be
+disabled and proper authentication, authorization, TLS, retention, and network policy
+must be configured before any non-local deployment.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/init_local_env.ps1
+powershell -ExecutionPolicy Bypass -File scripts/start_stack.ps1
+powershell -ExecutionPolicy Bypass -File scripts/stack_status.ps1
+powershell -ExecutionPolicy Bypass -File scripts/stop_stack.ps1
+```
+
+Local endpoints:
+
+- FraudShield API: `http://127.0.0.1:8000`
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- Prometheus: `http://127.0.0.1:9090`
+- Grafana: `http://127.0.0.1:3000`
+- PostgreSQL: `127.0.0.1:<configured-port>`
